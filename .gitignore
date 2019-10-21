@@ -31,3 +31,7 @@
 *.log
 *.lock
 build/
+libraries/
+*.iml
+
+/src/data/

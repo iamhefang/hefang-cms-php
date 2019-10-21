@@ -9,6 +9,7 @@ return [
 	'debug.enable' => false,
 	'pathinfo.type' => 'PATH_INFO',
 	'project.package' => "link.hefang.cms",
+	'project.application.class' => 'link.hefang.cms.HeFangCMS',
 	'database.enable' => false,
 	'database.class' => 'link.hefang.mvc.databases.Mysql',
 	'database.host' => 'localhost',
