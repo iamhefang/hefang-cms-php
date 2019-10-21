@@ -23,3 +23,11 @@
 /app/Config/core.php
 /app/Config/database.php
 /vendors/*
+.idea/
+/test/
+/tmp/
+*.phar
+*.err
+*.log
+*.lock
+build/

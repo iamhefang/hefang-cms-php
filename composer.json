@@ -1,0 +1,35 @@
+{
+	"name": "hefang/hefang-cms",
+	"version": "1.0.0",
+	"type": "project",
+	"description": "高性能内容管理系统",
+	"homepage": "https://github.com/iamhefang/hefang-cms-php",
+	"autoload": {
+		"files": [
+			"./src/hefang-cms.php"
+		]
+	},
+	"authors": [
+		{
+			"name": "hefang",
+			"email": "he@hefang.link",
+			"homepage": "https://hefang.link",
+			"role": "admin"
+		}
+	],
+	"license": [
+		"MIT"
+	],
+	"target-dir": "src",
+	"require": {
+		"php": ">7.0.0",
+		"hefang/php-helpers": "1.0.0",
+		"hefang/php-mvc": "dev-master"
+	},
+	"repositories": {
+		"packagist": {
+			"type": "composer",
+			"url": "https://packagist.phpcomposer.com"
+		}
+	}
+}
