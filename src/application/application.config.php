@@ -6,10 +6,12 @@ defined('PHP_MVC') or die('Access Refused');
  * 默认配置项, 如果项目配置项里面缺少值会使用该值
  */
 return [
-	'debug.enable' => false,
+	'debug.enable' => true,
 	'pathinfo.type' => 'PATH_INFO',
 	'project.package' => "link.hefang.cms",
 	'project.application.class' => 'link.hefang.cms.HeFangCMS',
+	//项目搜索字段名
+	'project.search.field.name' => 'search',
 	'database.enable' => false,
 	'database.class' => 'link.hefang.mvc.databases.Mysql',
 	'database.host' => 'localhost',
