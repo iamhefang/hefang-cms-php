@@ -11,7 +11,10 @@ class CacheController extends BaseController
 {
 	public function clean(): BaseView
 	{
-		$this->_checkSuperAdmin();
-		return $this->_apiSuccess();
+		$login = $this->_getLogin();
+		if (!$login->isSuperAdmin()) {
+			return $this->_restApiForbidden("只有超级管理员能清空缓存");
+		}
+		return $this->_restApiOk("ok");
 	}
 }

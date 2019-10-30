@@ -3,7 +3,6 @@
 
 namespace link\hefang\cms\content\controllers;
 
-
 use link\hefang\cms\content\models\ArticleModel;
 use link\hefang\helpers\ParseHelper;
 use link\hefang\helpers\StringHelper;
@@ -48,9 +47,9 @@ class ArticleController extends BaseController
 				$search,
 				$where
 			);
-			return $this->_apiSuccess($data);
+			return $this->_restApiOk($data);
 		} catch (\Exception $exception) {
-			return $this->_apiCodeServerError($exception);
+			return $this->_restApiServerError($exception);
 		}
 	}
 }

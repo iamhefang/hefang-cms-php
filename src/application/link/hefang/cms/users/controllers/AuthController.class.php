@@ -9,7 +9,6 @@ use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\controllers\BaseController;
 use link\hefang\mvc\Mvc;
 use link\hefang\mvc\views\BaseView;
-use link\hefang\mvc\views\CodeView;
 
 class AuthController extends BaseController
 {
@@ -20,7 +19,7 @@ class AuthController extends BaseController
 		$captcha = $this->_post("captcha");
 
 		if ($password !== "111111") {
-			return $this->_apiCode("密码错误", 400, CodeView::HTTP_STATUS_CODE[400]);
+			return $this->_restApiBadRequest("密码错误");
 		}
 
 		$login = [
@@ -30,16 +29,16 @@ class AuthController extends BaseController
 			"token" => RandomHelper::guid()
 		];
 		Mvc::getCache()->set($login["token"], $login);
-		return $this->_apiCodeOk($login);
+		return $this->_restApiOk($login);
 	}
 
 	public function current(): BaseView
 	{
 		$token = $this->_header("HeFang-CMS-Token");
 		if (StringHelper::isNullOrBlank($token)) {
-			return $this->_apiCodeUnauthorized();
+			return $this->_restApiUnauthorized();
 		}
 		$login = Mvc::getCache()->get($token);
-		return $login ? $this->_apiCodeOk($login) : $this->_apiCodeUnauthorized();
+		return $login ? $this->_restApiOk($login) : $this->_restApiUnauthorized();
 	}
 }
