@@ -14,14 +14,14 @@ class ArticleModel extends BaseModel
 	private $keywords;
 	private $description;
 	private $content;
-	private $post_time = null;
-	private $last_update_time = null;
+	private $postTime = null;
+	private $lastUpdateTime = null;
 	private $author;
 	private $password;
 	private $category;
-	private $approval_count = 0;
-	private $read_count = 0;
-	private $opposition_count = 0;
+	private $approvalCount = 0;
+	private $readCount = 0;
+	private $oppositionCount = 0;
 	private $enable = true;
 
 	/**
@@ -137,7 +137,7 @@ class ArticleModel extends BaseModel
 	 */
 	public function getPostTime(): int
 	{
-		return $this->post_time;
+		return $this->postTime;
 	}
 
 	/**
@@ -146,7 +146,7 @@ class ArticleModel extends BaseModel
 	 */
 	public function setPostTime(int $post_time): ArticleModel
 	{
-		$this->post_time = $post_time;
+		$this->postTime = $post_time;
 		return $this;
 	}
 
@@ -155,7 +155,7 @@ class ArticleModel extends BaseModel
 	 */
 	public function getLastUpdateTime(): int
 	{
-		return $this->last_update_time;
+		return $this->lastUpdateTime;
 	}
 
 	/**
@@ -164,7 +164,7 @@ class ArticleModel extends BaseModel
 	 */
 	public function setLastUpdateTime(int $last_update_time): ArticleModel
 	{
-		$this->last_update_time = $last_update_time;
+		$this->lastUpdateTime = $last_update_time;
 		return $this;
 	}
 
@@ -227,7 +227,7 @@ class ArticleModel extends BaseModel
 	 */
 	public function getApprovalCount(): int
 	{
-		return $this->approval_count;
+		return $this->approvalCount;
 	}
 
 	/**
@@ -236,7 +236,7 @@ class ArticleModel extends BaseModel
 	 */
 	public function setApprovalCount(int $approval_count): ArticleModel
 	{
-		$this->approval_count = $approval_count;
+		$this->approvalCount = $approval_count;
 		return $this;
 	}
 
@@ -245,7 +245,7 @@ class ArticleModel extends BaseModel
 	 */
 	public function getReadCount(): int
 	{
-		return $this->read_count;
+		return $this->readCount;
 	}
 
 	/**
@@ -254,7 +254,7 @@ class ArticleModel extends BaseModel
 	 */
 	public function setReadCount(int $read_count): ArticleModel
 	{
-		$this->read_count = $read_count;
+		$this->readCount = $read_count;
 		return $this;
 	}
 
@@ -263,7 +263,7 @@ class ArticleModel extends BaseModel
 	 */
 	public function getOppositionCount(): int
 	{
-		return $this->opposition_count;
+		return $this->oppositionCount;
 	}
 
 	/**
@@ -272,7 +272,7 @@ class ArticleModel extends BaseModel
 	 */
 	public function setOppositionCount(int $opposition_count): ArticleModel
 	{
-		$this->opposition_count = $opposition_count;
+		$this->oppositionCount = $opposition_count;
 		return $this;
 	}
 
@@ -296,7 +296,7 @@ class ArticleModel extends BaseModel
 
 	public static function table(): string
 	{
-		return "articles";
+		return "article";
 	}
 
 	public static function primaryKeyFields(): array
@@ -318,15 +318,15 @@ class ArticleModel extends BaseModel
 			"keywords",
 			"description",
 			"content",
-			"post_time",
-			"last_update_time",
+			"post_time" => "postTime",
+			"last_update_time" => "lastUpdateTime",
 			"author",
 			"password",
 			"category",
 			"enable",
-			"approval_count",
-			"read_count",
-			"opposition_count",
+			"approval_count" => "approvalCount",
+			"read_count" => "readCount",
+			"opposition_count" => "oppositionCount",
 		];
 	}
 }
