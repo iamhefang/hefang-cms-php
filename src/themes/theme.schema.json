@@ -1,0 +1,383 @@
+{
+	"$id": "https://hefang.link/schema/hefang-cms/theme.schema.json",
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"description": "hefang-cms主题声明文件",
+	"type": "object",
+	"required": [
+		"id",
+		"name",
+		"version"
+	],
+	"properties": {
+		"id": {
+			"type": "string",
+			"description": "主题id"
+		},
+		"name": {
+			"type": "string",
+			"description": "主题名称"
+		},
+		"version": {
+			"type": "string",
+			"description": "主题版本",
+			"pattern": "^\\d{1,10}(\\.\\d{1,10}){0,2}$"
+		},
+		"description": {
+			"type": "string",
+			"description": "主题描述"
+		},
+		"locales": {
+			"description": "主题支持的语言",
+			"anyOf": [
+				{
+					"type": "array",
+					"minItems": 1,
+					"uniqueItems": true,
+					"items": {
+						"$ref": "#/definitions/localeItem"
+					}
+				},
+				{
+					"$ref": "#/definitions/localeItem"
+				}
+			]
+		},
+		"tags": {
+			"type": "array",
+			"uniqueItems": true,
+			"minItems": 0,
+			"items": {
+				"type": "string"
+			},
+			"description": "主题标签"
+		},
+		"homepage": {
+			"type": "string",
+			"description": "主题主页"
+		},
+		"issues": {
+			"type": "string",
+			"description": "主题反馈页"
+		},
+		"author": {
+			"$ref": "#/definitions/author"
+		},
+		"settings": {
+			"type": "array",
+			"description": "主题设置",
+			"items": {
+				"$ref": "#/definitions/settingItem"
+			}
+		}
+	},
+	"definitions": {
+		"author": {
+			"type": "object",
+			"required": [
+				"name"
+			],
+			"properties": {
+				"name": {
+					"type": "string",
+					"description": "作者称呼"
+				},
+				"email": {
+					"type": "string",
+					"description": "作者邮箱"
+				},
+				"site": {
+					"type": "string",
+					"description": "作者个人网站"
+				}
+			}
+		},
+		"settingItem": {
+			"type": "object",
+			"required": [
+				"key",
+				"name",
+				"type"
+			],
+			"properties": {
+				"key": {
+					"type": "string",
+					"description": "配置项的key",
+					"minLength": 1,
+					"maxLength": 64
+				},
+				"name": {
+					"type": "string",
+					"description": "配置项名称",
+					"minLength": 1,
+					"maxLength": 32
+				},
+				"type": {
+					"type": "string",
+					"description": "配置项类型",
+					"enum": [
+						"object",
+						"number",
+						"textarea",
+						"text",
+						"html",
+						"boolean",
+						"image",
+						"code",
+						"checkbox",
+						"radio",
+						"date",
+						"datetime",
+						"time",
+						"range"
+					]
+				},
+				"description": {
+					"type": "string",
+					"description": "配置项描述"
+				},
+				"default": {
+					"type": [
+						"object",
+						"string",
+						"number",
+						"boolean",
+						"array"
+					],
+					"description": "配置项默认值"
+				}
+			}
+		},
+		"localeItem": {
+			"type": "string",
+			"enum": [
+				"all",
+				"af",
+				"af-ZA",
+				"ar",
+				"ar-AE",
+				"ar-BH",
+				"ar-DZ",
+				"ar-EG",
+				"ar-IQ",
+				"ar-JO",
+				"ar-KW",
+				"ar-LB",
+				"ar-LY",
+				"ar-MA",
+				"ar-OM",
+				"ar-QA",
+				"ar-SA",
+				"ar-SY",
+				"ar-TN",
+				"ar-YE",
+				"az",
+				"az-AZ",
+				"be",
+				"be-BY",
+				"bg",
+				"bg-BG",
+				"bs-BA",
+				"ca",
+				"ca-ES",
+				"cs",
+				"cs-CZ",
+				"cy",
+				"cy-GB",
+				"da",
+				"da-DK",
+				"de",
+				"de-AT",
+				"de-CH",
+				"de-DE",
+				"de-LI",
+				"de-LU",
+				"dv",
+				"dv-MV",
+				"el",
+				"el-GR",
+				"en",
+				"en-AU",
+				"en-BZ",
+				"en-CA",
+				"en-CB",
+				"en-GB",
+				"en-IE",
+				"en-JM",
+				"en-NZ",
+				"en-PH",
+				"en-TT",
+				"en-US",
+				"en-ZA",
+				"en-ZW",
+				"eo",
+				"es",
+				"es-AR",
+				"es-BO",
+				"es-CL",
+				"es-CO",
+				"es-CR",
+				"es-DO",
+				"es-EC",
+				"es-ES",
+				"es-GT",
+				"es-HN",
+				"es-MX",
+				"es-NI",
+				"es-PA",
+				"es-PE",
+				"es-PR",
+				"es-PY",
+				"es-SV",
+				"es-UY",
+				"es-VE",
+				"et",
+				"et-EE",
+				"eu",
+				"eu-ES",
+				"fa",
+				"fa-IR",
+				"fi",
+				"fi-FI",
+				"fo",
+				"fo-FO",
+				"fr",
+				"fr-BE",
+				"fr-CA",
+				"fr-CH",
+				"fr-FR",
+				"fr-LU",
+				"fr-MC",
+				"gl",
+				"gl-ES",
+				"gu",
+				"gu-IN",
+				"he",
+				"he-IL",
+				"hi",
+				"hi-IN",
+				"hr",
+				"hr-BA",
+				"hr-HR",
+				"hu",
+				"hu-HU",
+				"hy",
+				"hy-AM",
+				"id",
+				"id-ID",
+				"is",
+				"is-IS",
+				"it",
+				"it-CH",
+				"it-IT",
+				"ja",
+				"ja-JP",
+				"ka",
+				"ka-GE",
+				"kk",
+				"kk-KZ",
+				"kn",
+				"kn-IN",
+				"ko",
+				"ko-KR",
+				"kok",
+				"kok-IN",
+				"ky",
+				"ky-KG",
+				"lt",
+				"lt-LT",
+				"lv",
+				"lv-LV",
+				"mi",
+				"mi-NZ",
+				"mk",
+				"mk-MK",
+				"mn",
+				"mn-MN",
+				"mr",
+				"mr-IN",
+				"ms",
+				"ms-BN",
+				"ms-MY",
+				"mt",
+				"mt-MT",
+				"nb",
+				"nb-NO",
+				"nl",
+				"nl-BE",
+				"nl-NL",
+				"nn-NO",
+				"ns",
+				"ns-ZA",
+				"pa",
+				"pa-IN",
+				"pl",
+				"pl-PL",
+				"pt",
+				"pt-BR",
+				"pt-PT",
+				"qu",
+				"qu-BO",
+				"qu-EC",
+				"qu-PE",
+				"ro",
+				"ro-RO",
+				"ru",
+				"ru-RU",
+				"sa",
+				"sa-IN",
+				"se",
+				"se-FI",
+				"se-NO",
+				"se-SE",
+				"sk",
+				"sk-SK",
+				"sl",
+				"sl-SI",
+				"sq",
+				"sq-AL",
+				"sr-BA",
+				"sr-SP",
+				"sv",
+				"sv-FI",
+				"sv-SE",
+				"sw",
+				"sw-KE",
+				"syr",
+				"syr-SY",
+				"ta",
+				"ta-IN",
+				"te",
+				"te-IN",
+				"th",
+				"th-TH",
+				"tl",
+				"tl-PH",
+				"tn",
+				"tn-ZA",
+				"tr",
+				"tr-TR",
+				"ts",
+				"tt",
+				"tt-RU",
+				"uk",
+				"uk-UA",
+				"ur",
+				"ur-PK",
+				"uz",
+				"uz-UZ",
+				"vi",
+				"vi-VN",
+				"xh",
+				"xh-ZA",
+				"zh",
+				"zh-CN",
+				"zh-HK",
+				"zh-MO",
+				"zh-SG",
+				"zh-TW",
+				"zu",
+				"zu-ZA"
+			]
+		}
+	}
+}

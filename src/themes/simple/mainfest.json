@@ -1,4 +1,22 @@
 {
-	"name": "simple",
-	"id": "simple"
+	"$schema": "https://hefang.link/schema/hefang-cms/theme.schema.json?v=4",
+	"id": "hefang-cms-theme-simple",
+	"name": "简约白",
+	"version": "1.0.0",
+	"author": {
+		"name": "hefang",
+		"email": "he@hefang.link",
+		"site": "https://hefang.link"
+	},
+	"tags": [
+		"内置",
+		"官方",
+		"简约",
+		"可配置",
+		"白色"
+	],
+	"locales": [
+		"zh-CN",
+		"en-GB"
+	]
 }
