@@ -9,7 +9,7 @@ use link\hefang\mvc\models\BaseLoginModel;
 class AccountModel extends BaseLoginModel
 {
 	private $id = "";
-	private $role = "";
+	private $roleId = "";
 	private $name = "";
 	private $password = "";
 	private $registerTime = 0;
@@ -40,18 +40,18 @@ class AccountModel extends BaseLoginModel
 	/**
 	 * @return string
 	 */
-	public function getRole(): string
+	public function getRoleId(): string
 	{
-		return $this->role;
+		return $this->roleId;
 	}
 
 	/**
-	 * @param string $role
+	 * @param string $roleId
 	 * @return AccountModel
 	 */
-	public function setRole(string $role): AccountModel
+	public function setRoleId(string $roleId): AccountModel
 	{
-		$this->role = $role;
+		$this->roleId = $roleId;
 		return $this;
 	}
 
@@ -218,7 +218,7 @@ class AccountModel extends BaseLoginModel
 	{
 		return [
 			"id",
-			"role",
+			"role_id" => "roleId",
 			"name",
 			"password",
 			"register_time" => "registerTime",
@@ -232,7 +232,7 @@ class AccountModel extends BaseLoginModel
 
 	public function isAdmin(): bool
 	{
-		return $this->isSuperAdmin() || $this->getRole() === "admin";
+		return $this->isSuperAdmin() || $this->getRoleId() === "admin";
 	}
 
 	public function isSuperAdmin(): bool
@@ -245,20 +245,6 @@ class AccountModel extends BaseLoginModel
 	 */
 	public function getRoleName()
 	{
-		return $this->getRole();
-	}
-
-	/**
-	 * @return string|null
-	 */
-	public function getRoleId()
-	{
-		return $this->getRole();
-	}
-
-	public function setRoleId(string $roleId)
-	{
-		$this->setRole($roleId);
-		return $this;
+		return $this->getRoleId();
 	}
 }

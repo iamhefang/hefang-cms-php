@@ -133,7 +133,7 @@ class FunctionModel extends BaseModel
 	 */
 	public function isEnable(): bool
 	{
-		return $this->enable;
+		return !!$this->enable;
 	}
 
 	/**
@@ -144,6 +144,16 @@ class FunctionModel extends BaseModel
 	{
 		$this->enable = $enable;
 		return $this;
+	}
+
+	public function toMap(): array
+	{
+		$map = parent::toMap();
+		if (!empty($this->children)) {
+			$map["children"] = $this->children;
+		}
+		$map["enable"] = $this->isEnable();
+		return $map;
 	}
 
 	/**
@@ -183,7 +193,6 @@ class FunctionModel extends BaseModel
 		$pager = FunctionModel::pager(1, 1000, null, "enable = TRUE", [new SqlSort("sort")]);
 		foreach ($pager->getData() as $item) {
 			if (!($item instanceof FunctionModel)) continue;
-			var_dump($functions);
 			if (StringHelper::isNullOrBlank($item->getParentId())) {
 				if (array_key_exists($item->getId(), $functions)) {
 					$item->children = $functions[$item->getId()]->children;

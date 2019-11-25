@@ -2,6 +2,13 @@
 
 namespace link\hefang\cms\main\controllers;
 
-class HomeController extends BaseController{
+use link\hefang\mvc\controllers\BaseController;
+use link\hefang\mvc\views\BaseView;
 
+class HomeController extends BaseController
+{
+	public function index(): BaseView
+	{
+
+	}
 }
