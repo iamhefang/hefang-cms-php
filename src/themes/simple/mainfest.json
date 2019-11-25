@@ -18,5 +18,14 @@
 	"locales": [
 		"zh-CN",
 		"en-GB"
+	],
+	"description": "hefang-cms官方自带的简约主题，也做为主题编写示例用",
+	"settings": [
+		{
+			"key": "fixedHeader",
+			"type": "boolean",
+			"name": "固定导航栏",
+			"default": true
+		}
 	]
 }
