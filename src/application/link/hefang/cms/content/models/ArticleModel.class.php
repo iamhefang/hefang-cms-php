@@ -4,24 +4,26 @@
 namespace link\hefang\cms\content\models;
 
 
+use link\hefang\cms\user\models\AccountModel;
 use link\hefang\mvc\models\BaseModel;
+use link\hefang\mvc\Mvc;
 
 class ArticleModel extends BaseModel
 {
-	private $id;
-	private $title;
-	private $path;
-	private $keywords;
-	private $description;
-	private $content;
-	private $postTime = null;
-	private $lastUpdateTime = null;
-	private $author;
-	private $password;
-	private $category;
-	private $approvalCount = 0;
+	private $id = "";
+	private $title = "";
+	private $path = "";
+	private $keywords = "";
+	private $description = "";
+	private $content = "";
+	private $postTime = 0;
+	private $lastAlterTime = 0;
+	private $authorId = "";
 	private $readCount = 0;
-	private $oppositionCount = 0;
+	private $approvalCount = 0;
+	private $opposeCount = 0;
+	private $isDraft = true;
+	private $categoryId = "";
 	private $enable = true;
 
 	/**
@@ -141,102 +143,48 @@ class ArticleModel extends BaseModel
 	}
 
 	/**
-	 * @param int $post_time
+	 * @param int $postTime
 	 * @return ArticleModel
 	 */
-	public function setPostTime(int $post_time): ArticleModel
+	public function setPostTime(int $postTime): ArticleModel
 	{
-		$this->postTime = $post_time;
+		$this->postTime = $postTime;
 		return $this;
 	}
 
 	/**
 	 * @return int
 	 */
-	public function getLastUpdateTime(): int
+	public function getLastAlterTime(): int
 	{
-		return $this->lastUpdateTime;
+		return $this->lastAlterTime;
 	}
 
 	/**
-	 * @param int $last_update_time
+	 * @param int $lastAlterTime
 	 * @return ArticleModel
 	 */
-	public function setLastUpdateTime(int $last_update_time): ArticleModel
+	public function setLastAlterTime(int $lastAlterTime): ArticleModel
 	{
-		$this->lastUpdateTime = $last_update_time;
+		$this->lastAlterTime = $lastAlterTime;
 		return $this;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getAuthor(): string
+	public function getAuthorId(): string
 	{
-		return $this->author;
+		return $this->authorId;
 	}
 
 	/**
-	 * @param string $author
+	 * @param string $authorId
 	 * @return ArticleModel
 	 */
-	public function setAuthor(string $author): ArticleModel
+	public function setAuthorId(string $authorId): ArticleModel
 	{
-		$this->author = $author;
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getPassword(): string
-	{
-		return $this->password;
-	}
-
-	/**
-	 * @param string $password
-	 * @return ArticleModel
-	 */
-	public function setPassword(string $password): ArticleModel
-	{
-		$this->password = $password;
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getCategory(): string
-	{
-		return $this->category;
-	}
-
-	/**
-	 * @param string $category
-	 * @return ArticleModel
-	 */
-	public function setCategory(string $category): ArticleModel
-	{
-		$this->category = $category;
-		return $this;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getApprovalCount(): int
-	{
-		return $this->approvalCount;
-	}
-
-	/**
-	 * @param int $approval_count
-	 * @return ArticleModel
-	 */
-	public function setApprovalCount(int $approval_count): ArticleModel
-	{
-		$this->approvalCount = $approval_count;
+		$this->authorId = $authorId;
 		return $this;
 	}
 
@@ -249,30 +197,84 @@ class ArticleModel extends BaseModel
 	}
 
 	/**
-	 * @param int $read_count
+	 * @param int $readCount
 	 * @return ArticleModel
 	 */
-	public function setReadCount(int $read_count): ArticleModel
+	public function setReadCount(int $readCount): ArticleModel
 	{
-		$this->readCount = $read_count;
+		$this->readCount = $readCount;
 		return $this;
 	}
 
 	/**
 	 * @return int
 	 */
-	public function getOppositionCount(): int
+	public function getApprovalCount(): int
 	{
-		return $this->oppositionCount;
+		return $this->approvalCount;
 	}
 
 	/**
-	 * @param int $opposition_count
+	 * @param int $approvalCount
 	 * @return ArticleModel
 	 */
-	public function setOppositionCount(int $opposition_count): ArticleModel
+	public function setApprovalCount(int $approvalCount): ArticleModel
 	{
-		$this->oppositionCount = $opposition_count;
+		$this->approvalCount = $approvalCount;
+		return $this;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getOpposeCount(): int
+	{
+		return $this->opposeCount;
+	}
+
+	/**
+	 * @param int $opposeCount
+	 * @return ArticleModel
+	 */
+	public function setOpposeCount(int $opposeCount): ArticleModel
+	{
+		$this->opposeCount = $opposeCount;
+		return $this;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isDraft(): bool
+	{
+		return $this->isDraft;
+	}
+
+	/**
+	 * @param bool $isDraft
+	 * @return ArticleModel
+	 */
+	public function setIsDraft(bool $isDraft): ArticleModel
+	{
+		$this->isDraft = $isDraft;
+		return $this;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getCategoryId(): string
+	{
+		return $this->categoryId;
+	}
+
+	/**
+	 * @param string $categoryId
+	 * @return ArticleModel
+	 */
+	public function setCategoryId(string $categoryId): ArticleModel
+	{
+		$this->categoryId = $categoryId;
 		return $this;
 	}
 
@@ -294,9 +296,30 @@ class ArticleModel extends BaseModel
 		return $this;
 	}
 
-	public static function table(): string
+	public function toMap(): array
 	{
-		return "article";
+		$map = parent::toMap();
+		$map["tags"] = self::database()->pager(
+			Mvc::getTablePrefix() . "content_tag",
+			1,
+			100,
+			null,
+			"content_id = '{$this->getId()}'"
+		);
+		$category = CategoryModel::get($this->getCategoryId());
+		if (($category instanceof CategoryModel)) {
+			$map["categoryName"] = $category->getName();
+		} else {
+			$map["categoryName"] = null;
+		}
+
+		$author = AccountModel::get($this->getAuthorId());
+		if (($author instanceof AccountModel)) {
+			$map["authorName"] = $author->getName();
+		} else {
+			$map["authorName"] = null;
+		}
+		return $map;
 	}
 
 	public static function primaryKeyFields(): array
@@ -304,11 +327,6 @@ class ArticleModel extends BaseModel
 		return ["id"];
 	}
 
-	/**
-	 * 返回模型和数据库对应的字段
-	 * key 为数据库对应的字段名, value 为模型字段名
-	 * @return array
-	 */
 	public static function fields(): array
 	{
 		return [
@@ -319,14 +337,14 @@ class ArticleModel extends BaseModel
 			"description",
 			"content",
 			"post_time" => "postTime",
-			"last_update_time" => "lastUpdateTime",
-			"author",
-			"password",
-			"category",
-			"enable",
-			"approval_count" => "approvalCount",
+			"last_alter_time" => "lastAlterTime",
+			"author_id" => "authorId",
 			"read_count" => "readCount",
-			"opposition_count" => "oppositionCount",
+			"approval_count" => "approvalCount",
+			"oppose_count" => "opposeCount",
+			"is_draft" => "isDraft",
+			"category_id" => "categoryId",
+			"enable"
 		];
 	}
 }
