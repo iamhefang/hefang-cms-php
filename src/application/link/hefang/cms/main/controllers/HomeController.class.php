@@ -9,6 +9,9 @@ class HomeController extends BaseController
 {
 	public function index(): BaseView
 	{
-
+		if ($this->_method() !== "POST") {
+			return $this->_methodNotAllowed();
+		}
+		return $this->_text(print_r($_SERVER));
 	}
 }

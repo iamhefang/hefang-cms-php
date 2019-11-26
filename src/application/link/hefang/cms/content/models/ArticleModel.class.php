@@ -24,6 +24,7 @@ class ArticleModel extends BaseModel
 	private $opposeCount = 0;
 	private $isDraft = true;
 	private $categoryId = "";
+	private $isPrivate = false;
 	private $enable = true;
 
 	/**
@@ -281,6 +282,24 @@ class ArticleModel extends BaseModel
 	/**
 	 * @return bool
 	 */
+	public function isPrivate(): bool
+	{
+		return $this->isPrivate;
+	}
+
+	/**
+	 * @param bool $isPrivate
+	 * @return ArticleModel
+	 */
+	public function setIsPrivate(bool $isPrivate): ArticleModel
+	{
+		$this->isPrivate = $isPrivate;
+		return $this;
+	}
+
+	/**
+	 * @return bool
+	 */
 	public function isEnable(): bool
 	{
 		return $this->enable;
@@ -344,6 +363,7 @@ class ArticleModel extends BaseModel
 			"oppose_count" => "opposeCount",
 			"is_draft" => "isDraft",
 			"category_id" => "categoryId",
+			"is_private" => "isPrivate",
 			"enable"
 		];
 	}
