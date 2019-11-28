@@ -8,6 +8,22 @@ defined('PHP_MVC') or die('Access Refused');
 return [
 	'debug.enable' => true,
 	'pathinfo.type' => 'PATH_INFO',
+	'project.router' => [
+		'/' => [
+			"exact" => true,
+			"controller" => "link.hefang.cms.main.controllers.HomeController",
+		],
+		'/apis/*' => [
+			"children" => [
+				"article/:id?" => [
+					"controller" => "link.hefang.cms.content.controllers.ArticleController"
+				],
+				"category/:id?" => [
+					"controller" => "link.hefang.cms.content.controllers.CategoryController"
+				]
+			]
+		]
+	],
 	'project.package' => "link.hefang.cms",
 	'project.application.class' => 'link.hefang.cms.HeFangCMS',
 	//项目搜索字段名

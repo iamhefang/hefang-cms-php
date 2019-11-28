@@ -32,7 +32,6 @@ class ArticleController extends BaseController
 		} else if ($method === "PATCH" || $method === "PUT") {
 			try {
 				$model = ArticleModel::get($id);
-
 			} catch (ModelException $e) {
 				return $this->_restApiServerError($e, "解析原数据时出现异常");
 			} catch (SqlException $e) {
