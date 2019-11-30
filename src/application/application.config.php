@@ -36,7 +36,7 @@ return [
 	'database.password' => '11111111',
 	'database.charset' => 'utf8mb4',
 	'database.database' => 'hefang-cms',
-	'password.salt' => null,// 密码加密时使用的盐, 该值不能使用方法生成, 必须写死,
+	'password.salt' => "(*lfwekjfO*gklswjefwFDSefwgwlekjf",// 密码加密时使用的盐, 该值不能使用方法生成, 必须写死,
 	'default.module' => 'main',
 	'default.controller' => 'home',
 	'default.action' => 'index',

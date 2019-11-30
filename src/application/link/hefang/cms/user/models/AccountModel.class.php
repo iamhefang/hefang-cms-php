@@ -12,11 +12,11 @@ class AccountModel extends BaseLoginModel
 	private $roleId = "";
 	private $name = "";
 	private $password = "";
-	private $registerTime = 0;
+	private $registerTime = null;
 	private $registerType = "";
 	private $email = "";
 	private $locked = false;
-	private $lockedTime = 0;
+	private $lockedTime = null;
 	private $enable = true;
 
 	/**
@@ -92,9 +92,9 @@ class AccountModel extends BaseLoginModel
 	}
 
 	/**
-	 * @return int
+	 * @return string
 	 */
-	public function getRegisterTime(): int
+	public function getRegisterTime(): string
 	{
 		return $this->registerTime;
 	}
@@ -103,7 +103,7 @@ class AccountModel extends BaseLoginModel
 	 * @param int $registerTime
 	 * @return AccountModel
 	 */
-	public function setRegisterTime(int $registerTime): AccountModel
+	public function setRegisterTime($registerTime): AccountModel
 	{
 		$this->registerTime = $registerTime;
 		return $this;
@@ -164,18 +164,18 @@ class AccountModel extends BaseLoginModel
 	}
 
 	/**
-	 * @return int
+	 * @return string
 	 */
-	public function getLockedTime(): int
+	public function getLockedTime(): string
 	{
 		return $this->lockedTime;
 	}
 
 	/**
-	 * @param int $lockedTime
+	 * @param string $lockedTime
 	 * @return AccountModel
 	 */
-	public function setLockedTime(int $lockedTime): AccountModel
+	public function setLockedTime(string $lockedTime): AccountModel
 	{
 		$this->lockedTime = $lockedTime;
 		return $this;
