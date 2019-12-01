@@ -17,6 +17,7 @@ class AccountModel extends BaseLoginModel
 	private $email = "";
 	private $locked = false;
 	private $lockedTime = null;
+	private $avatar = null;
 	private $enable = true;
 
 	/**
@@ -182,6 +183,24 @@ class AccountModel extends BaseLoginModel
 	}
 
 	/**
+	 * @return string|null
+	 */
+	public function getAvatar()
+	{
+		return $this->avatar;
+	}
+
+	/**
+	 * @param string $avatar
+	 * @return AccountModel
+	 */
+	public function setAvatar(string $avatar): AccountModel
+	{
+		$this->avatar = $avatar;
+		return $this;
+	}
+
+	/**
 	 * @return bool
 	 */
 	public function isEnable(): bool
@@ -220,6 +239,7 @@ class AccountModel extends BaseLoginModel
 			"id",
 			"role_id" => "roleId",
 			"name",
+			"avatar",
 			"password",
 			"register_time" => "registerTime",
 			"register_type" => "registerType",

@@ -9,7 +9,7 @@ use link\hefang\mvc\databases\SqlSort;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\models\BaseModel;
 
-class FunctionModel extends BaseModel
+class MenuModel extends BaseModel
 {
 	private $id = "";
 	private $parentId = "";
@@ -30,9 +30,9 @@ class FunctionModel extends BaseModel
 
 	/**
 	 * @param string $id
-	 * @return FunctionModel
+	 * @return MenuModel
 	 */
-	public function setId(string $id): FunctionModel
+	public function setId(string $id): MenuModel
 	{
 		$this->id = $id;
 		return $this;
@@ -48,9 +48,9 @@ class FunctionModel extends BaseModel
 
 	/**
 	 * @param string $parentId
-	 * @return FunctionModel
+	 * @return MenuModel
 	 */
-	public function setParentId(string $parentId): FunctionModel
+	public function setParentId(string $parentId): MenuModel
 	{
 		$this->parentId = $parentId;
 		return $this;
@@ -66,9 +66,9 @@ class FunctionModel extends BaseModel
 
 	/**
 	 * @param string $name
-	 * @return FunctionModel
+	 * @return MenuModel
 	 */
-	public function setName(string $name): FunctionModel
+	public function setName(string $name): MenuModel
 	{
 		$this->name = $name;
 		return $this;
@@ -84,9 +84,9 @@ class FunctionModel extends BaseModel
 
 	/**
 	 * @param string $path
-	 * @return FunctionModel
+	 * @return MenuModel
 	 */
-	public function setPath(string $path): FunctionModel
+	public function setPath(string $path): MenuModel
 	{
 		$this->path = $path;
 		return $this;
@@ -102,9 +102,9 @@ class FunctionModel extends BaseModel
 
 	/**
 	 * @param string $icon
-	 * @return FunctionModel
+	 * @return MenuModel
 	 */
-	public function setIcon(string $icon): FunctionModel
+	public function setIcon(string $icon): MenuModel
 	{
 		$this->icon = $icon;
 		return $this;
@@ -120,9 +120,9 @@ class FunctionModel extends BaseModel
 
 	/**
 	 * @param int $sort
-	 * @return FunctionModel
+	 * @return MenuModel
 	 */
-	public function setSort(int $sort): FunctionModel
+	public function setSort(int $sort): MenuModel
 	{
 		$this->sort = $sort;
 		return $this;
@@ -138,9 +138,9 @@ class FunctionModel extends BaseModel
 
 	/**
 	 * @param bool $enable
-	 * @return FunctionModel
+	 * @return MenuModel
 	 */
-	public function setEnable(bool $enable): FunctionModel
+	public function setEnable(bool $enable): MenuModel
 	{
 		$this->enable = $enable;
 		return $this;
@@ -190,9 +190,9 @@ class FunctionModel extends BaseModel
 	public static function all()
 	{
 		$functions = [];
-		$pager = FunctionModel::pager(1, 1000, null, "enable = TRUE", [new SqlSort("sort")]);
+		$pager = MenuModel::pager(1, 1000, null, "enable = TRUE", [new SqlSort("sort")]);
 		foreach ($pager->getData() as $item) {
-			if (!($item instanceof FunctionModel)) continue;
+			if (!($item instanceof MenuModel)) continue;
 			if (StringHelper::isNullOrBlank($item->getParentId())) {
 				if (array_key_exists($item->getId(), $functions)) {
 					$item->children = $functions[$item->getId()]->children;

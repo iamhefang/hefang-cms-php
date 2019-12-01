@@ -90,13 +90,14 @@ class ArticleController extends BaseController
 		}
 
 		if (!StringHelper::isNullOrBlank($category)) {
-			$where .= " AND `category` = '{$category}'";
+			$categoryTable = Mvc::getTablePrefix() . "category";
+			$where .= " AND `{$categoryTable}` = '{$category}'";
 		}
 
 		if (!StringHelper::isNullOrBlank($tag)) {
-			$where .= " AND `id` IN (SELECT content_id FROM `tags` WHERE `tag` = '{$tag}')";
+			$tagTable = Mvc::getTablePrefix() . "tags";
+			$where .= " AND `id` IN (SELECT content_id FROM `{$tagTable}` WHERE `tag` = '{$tag}')";
 		}
-
 
 		try {
 			$data = ArticleModel::pager(

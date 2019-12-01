@@ -4,7 +4,7 @@
 namespace link\hefang\cms\user\controllers;
 
 
-use link\hefang\cms\admin\models\FunctionModel;
+use link\hefang\cms\admin\models\MenuModel;
 use link\hefang\cms\user\models\AccountModel;
 use link\hefang\helpers\HashHelper;
 use link\hefang\mvc\controllers\BaseController;
@@ -58,6 +58,15 @@ class AccountController extends BaseController
 		}
 	}
 
+	public function logout(): BaseView
+	{
+		$login = $this->_getLogin();
+		if ($login instanceof AccountModel) {
+			$login->logout($this);
+		}
+		return $this->_restApiOk();
+	}
+
 	/**
 	 * 获取当前登录用户
 	 * @return BaseView
@@ -74,8 +83,7 @@ class AccountController extends BaseController
 	 */
 	public function menus(): BaseView
 	{
-//		$login = $this->_getLogin();_getLogin
-
-		return $this->_restApiOk(FunctionModel::all());
+		$login = $this->_getLogin();
+		return $this->_restApiOk(MenuModel::all());
 	}
 }

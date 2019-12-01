@@ -4,15 +4,20 @@
 namespace link\hefang\cms\admin\controllers;
 
 
-use link\hefang\cms\admin\models\FunctionModel;
+use link\hefang\cms\admin\models\MenuModel;
+use link\hefang\cms\user\models\AccountModel;
+use link\hefang\cms\user\models\RoleModel;
 use link\hefang\guid\GUKey;
 use link\hefang\helpers\CollectionHelper;
+use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\controllers\BaseController;
 use link\hefang\mvc\databases\Sql;
+use link\hefang\mvc\exceptions\ModelException;
+use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\Mvc;
 use link\hefang\mvc\views\BaseView;
 
-class FunctionController extends BaseController
+class MenuController extends BaseController
 {
 	public function init(): BaseView
 	{
@@ -25,7 +30,7 @@ class FunctionController extends BaseController
 		$key = new GUKey("hefang-cms-function");
 		foreach ($items as $item) {
 			$id = $key->next();
-			$sqls[] = new Sql("insert into `function`(`id`,`name`,`path`,`icon`,`sort`) values (:id,:name,:path,:icon,:sort)", [
+			$sqls[] = new Sql("insert into `menu`(`id`,`name`,`path`,`icon`,`sort`) values (:id,:name,:path,:icon,:sort)", [
 				'id' => $id,
 				'name' => $item['name'],
 				'icon' => $item['icon'],
@@ -34,7 +39,7 @@ class FunctionController extends BaseController
 			]);
 			if (is_array(CollectionHelper::getOrDefault($item, 'children'))) {
 				foreach ($item['children'] as $item) {
-					$sqls[] = new Sql("insert into `function`(`id`,`name`,`path`,`icon`,`sort`,`parent_id`) values (:id,:name,:path,:icon,:sort,:parent_id)", [
+					$sqls[] = new Sql("insert into `menu`(`id`,`name`,`path`,`icon`,`sort`,`parent_id`) values (:id,:name,:path,:icon,:sort,:parent_id)", [
 						'id' => $key->next(),
 						'parent_id' => $id,
 						'name' => $item['name'],
@@ -45,11 +50,33 @@ class FunctionController extends BaseController
 				}
 			}
 		}
-		return $this->_text(FunctionModel::database()->transaction($sqls));
+		return $this->_text(MenuModel::database()->transaction($sqls));
 	}
 
-	public function list(): BaseView
+	public function bind(): BaseView
 	{
-
+		$login = $this->_getLogin();
+		if (!($login instanceof AccountModel)) {
+			return $this->_restApiUnauthorized();
+		}
+		if (!$login->isAdmin()) {
+			return $this->_restApiForbidden("该功能只能管理员才能使用");
+		}
+		$roleId = $this->_request("roleId");
+		$menuIds = $this->_post("menuIds");
+		if (StringHelper::isNullOrBlank($roleId) || !is_array($menuIds)) {
+			return $this->_restApiBadRequest();
+		}
+		try {
+			$role = RoleModel::get($roleId);
+			if (!($role instanceof RoleModel) || !$role->isExist() || !$role->isEnable()) {
+				return $this->_restApiNotFound("要绑定菜单的角色不存在或已被禁用");
+			}
+			return $role->bindMenus($menuIds) ? $this->_restApiOk() : $this->_restNotModified();
+		} catch (ModelException $e) {
+			return $this->_restApiServerError($e, "解析角色数据时异常");
+		} catch (SqlException $e) {
+			return $this->_restApiServerError($e, "读取角色数据时异常");
+		}
 	}
 }
