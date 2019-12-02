@@ -8,14 +8,15 @@ use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\databases\SqlSort;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\models\BaseModel;
+use link\hefang\mvc\Mvc;
 
 class MenuModel extends BaseModel
 {
 	private $id = "";
-	private $parentId = "";
+	private $parentId;
 	private $name = "";
 	private $path = "";
-	private $icon = "";
+	private $icon;
 	private $sort = 0;
 	private $enable = true;
 	private $children = [];
@@ -39,7 +40,7 @@ class MenuModel extends BaseModel
 	}
 
 	/**
-	 * @return string
+	 * @return string|null
 	 */
 	public function getParentId()
 	{
@@ -47,10 +48,10 @@ class MenuModel extends BaseModel
 	}
 
 	/**
-	 * @param string $parentId
+	 * @param string|null $parentId
 	 * @return MenuModel
 	 */
-	public function setParentId(string $parentId): MenuModel
+	public function setParentId($parentId): MenuModel
 	{
 		$this->parentId = $parentId;
 		return $this;
@@ -93,18 +94,18 @@ class MenuModel extends BaseModel
 	}
 
 	/**
-	 * @return string
+	 * @return string|null
 	 */
-	public function getIcon(): string
+	public function getIcon()
 	{
 		return $this->icon;
 	}
 
 	/**
-	 * @param string $icon
+	 * @param string|null $icon
 	 * @return MenuModel
 	 */
-	public function setIcon(string $icon): MenuModel
+	public function setIcon($icon): MenuModel
 	{
 		$this->icon = $icon;
 		return $this;
@@ -185,10 +186,16 @@ class MenuModel extends BaseModel
 	}
 
 	/**
+	 * @param bool $useCache
+	 * @return array
 	 * @throws SqlException
 	 */
-	public static function all()
+	public static function all(bool $useCache = true): array
 	{
+		$cache = Mvc::getCache()->get("all-menus");
+		if (!Mvc::isDebug() && $useCache && is_array($cache) && count($cache) > 0) {
+			return $cache;
+		}
 		$functions = [];
 		$pager = MenuModel::pager(1, 1000, null, "enable = TRUE", [new SqlSort("sort")]);
 		foreach ($pager->getData() as $item) {
@@ -202,6 +209,8 @@ class MenuModel extends BaseModel
 				$functions[$item->getParentId()]->children[] = $item;
 			}
 		}
-		return array_values($functions);
+		$all = array_values($functions);
+		Mvc::getCache()->set("all-menus", $all);
+		return $all;
 	}
 }

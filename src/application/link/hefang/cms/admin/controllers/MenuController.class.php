@@ -19,6 +19,92 @@ use link\hefang\mvc\views\BaseView;
 
 class MenuController extends BaseController
 {
+	public function list(): BaseView
+	{
+		try {
+			$pager = MenuModel::pager($this->_pageIndex(), $this->_pageSize(), null, "enable = TRUE", [$this->_sort()]);
+			return $this->_restApiOk($pager);
+		} catch (SqlException $e) {
+			return $this->_restApiServerError($e, "读取数据时出现异常");
+		}
+	}
+
+	public function delete(): BaseView
+	{
+		$login = $this->_getLogin();
+		if (!($login instanceof AccountModel)) {
+			return $this->_restApiUnauthorized();
+		}
+		if (!$login->isAdmin()) {
+			return $this->_restApiForbidden("该功能只有管理员才能使用");
+		}
+		$id = $this->_request("id");
+		if (!GUKey::isGuKey($id)) return $this->_restApiBadRequest();
+
+		try {
+			$model = MenuModel::get($id);
+			if (!($model instanceof MenuModel) || !$model->isExist()) {
+				return $this->_restApiNotFound("要修改的菜单不存在或已被物理删除");
+			}
+			$res = $model->setEnable(false)->update(["enable"]);
+			return $res ? $this->_restApiOk() : $this->_restNotModified();
+		} catch (ModelException $e) {
+			return $this->_restApiServerError($e, "解析数据时出现异常");
+		} catch (SqlException $e) {
+			return $this->_restApiServerError($e, "读取数据时出现异常");
+		}
+	}
+
+	public function set(): BaseView
+	{
+		$login = $this->_getLogin();
+		if (!($login instanceof AccountModel)) {
+			return $this->_restApiUnauthorized();
+		}
+		if (!$login->isAdmin()) {
+			return $this->_restApiForbidden("该功能只有管理员才能使用");
+		}
+		$id = $this->_post("id");
+		$parentId = $this->_post("parentId");
+		$name = $this->_post("name");
+		$path = $this->_post("path");
+		$icon = $this->_post("icon");
+		$sort = $this->_post("sort");
+		try {
+			$model = new MenuModel();
+			$model->setId((new GUKey("menu"))->next());
+			if (GUKey::isGuKey($id)) {
+				$model = MenuModel::get($id);
+				if (!($model instanceof MenuModel) || !$model->isExist() || !$model->isEnable()) {
+					return $this->_restApiNotFound("要修改的菜单不存在或已被删除");
+				}
+			}
+			$model->setName($name)
+				->setParentId($parentId)
+				->setPath($path)
+				->setIcon($icon)
+				->setSort($sort);
+			$res = GUKey::isGuKey($id) ? $model->update(["name", "path", "icon", "sort", "parent_id"]) : $model->insert();
+			if ($res) {
+				Mvc::getCache()->remove("all-menus");
+			}
+			return $res ? $this->_restApiOk() : $this->_restNotModified();
+		} catch (ModelException $e) {
+			return $this->_restApiServerError($e, "解析数据时出现异常");
+		} catch (SqlException $e) {
+			return $this->_restApiServerError($e, "读取数据时出现异常");
+		}
+	}
+
+	public function all(): BaseView
+	{
+		try {
+			return $this->_restApiOk(MenuModel::all());
+		} catch (SqlException $e) {
+			return $this->_restApiServerError($e, "读取数据时出现异常");
+		}
+	}
+
 	public function init(): BaseView
 	{
 		$sqls = [];
