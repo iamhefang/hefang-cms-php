@@ -13,6 +13,13 @@ class HeFangCMS extends SimpleApplication
 {
 	const PREFIX_APIS = "/apis/";
 
+	public function onInit()
+	{
+		return [
+			"site|name" => "何方CMS"
+		];
+	}
+
 	public function onRequest(string $path)
 	{
 		Mvc::getLogger()->debug("Request: " . $path);

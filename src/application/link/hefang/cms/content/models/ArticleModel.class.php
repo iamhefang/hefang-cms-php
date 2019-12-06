@@ -5,6 +5,9 @@ namespace link\hefang\cms\content\models;
 
 
 use link\hefang\cms\user\models\AccountModel;
+use link\hefang\helpers\StringHelper;
+use link\hefang\mvc\exceptions\ModelException;
+use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\models\BaseModel;
 use link\hefang\mvc\Mvc;
 
@@ -26,6 +29,9 @@ class ArticleModel extends BaseModel
 	private $categoryId = "";
 	private $isPrivate = false;
 	private $enable = true;
+	private $tags = [];
+	private $categoryName = null;
+	private $authorName = null;
 
 	/**
 	 * @return string
@@ -318,26 +324,9 @@ class ArticleModel extends BaseModel
 	public function toMap(): array
 	{
 		$map = parent::toMap();
-		$map["tags"] = self::database()->pager(
-			Mvc::getTablePrefix() . "content_tag",
-			1,
-			100,
-			null,
-			"content_id = '{$this->getId()}'"
-		);
-		$category = CategoryModel::get($this->getCategoryId());
-		if (($category instanceof CategoryModel)) {
-			$map["categoryName"] = $category->getName();
-		} else {
-			$map["categoryName"] = null;
-		}
-
-		$author = AccountModel::get($this->getAuthorId());
-		if (($author instanceof AccountModel)) {
-			$map["authorName"] = $author->getName();
-		} else {
-			$map["authorName"] = null;
-		}
+		$map["tags"] = $this->getTags();
+		$map["categoryName"] = $this->getCategoryName();
+		$map["authorName"] = $this->getAuthorName();
 		return $map;
 	}
 
@@ -366,5 +355,55 @@ class ArticleModel extends BaseModel
 			"is_private" => "isPrivate",
 			"enable"
 		];
+	}
+
+	/**
+	 * @return array
+	 * @throws SqlException
+	 */
+	public function getTags(): array
+	{
+		if (count($this->tags) < 1) {
+			$this->tags = self::database()->pager(
+				Mvc::getTablePrefix() . "content_tag",
+				1,
+				100,
+				null,
+				"content_id = '{$this->getId()}'"
+			)->getData();
+		}
+		return $this->tags;
+	}
+
+	/**
+	 * @return string
+	 * @throws ModelException
+	 * @throws SqlException
+	 */
+	public function getAuthorName(): string
+	{
+		$author = AccountModel::get($this->getAuthorId());
+		if (($author instanceof AccountModel)) {
+			$this->authorName = $author->getName();
+		} else {
+			$this->authorName = null;
+		}
+		return $this->authorName;
+	}
+
+	/**
+	 * @return null|string
+	 * @throws ModelException
+	 * @throws SqlException
+	 */
+	public function getCategoryName()
+	{
+		if ($this->categoryName === null) {
+			$category = CategoryModel::get($this->getCategoryId());
+			if (($category instanceof CategoryModel)) {
+				$this->categoryName = $category->getName();
+			}
+		}
+		return $this->categoryName;
 	}
 }

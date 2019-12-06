@@ -118,7 +118,7 @@
 		},
 		"supportVersion": {
 			"type": "string",
-			"pattern": "([><]\\d+(\\.\\d+){0,2})"
+			"pattern": "([><]\\d+(\\.\\d+){0,2})|(\\*)"
 		},
 		"settingItem": {
 			"type": "object",

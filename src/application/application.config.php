@@ -42,7 +42,7 @@ return [
 	'default.action' => 'index',
 	'default.page.size' => 20,
 	'default.charset' => 'utf-8',
-	'default.theme' => 'default',
+	'default.theme' => 'simple',
 	'default.locale' => 'zh_CN',
 	'prefix.url.main' => '/index.php',
 	'prefix.url.file' => '/files'
