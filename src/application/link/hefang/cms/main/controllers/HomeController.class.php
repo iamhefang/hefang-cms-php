@@ -64,8 +64,8 @@ class HomeController extends BaseController
 		$name = Mvc::getConfig("site|name");
 		$title = CollectionHelper::getOrDefault($data, "title", "无标题");
 		return array_merge([
-			"keywords" => "",
-			"description" => "",
+			"keywords" => Mvc::getConfig("site|keywords"),
+			"description" => Mvc::getConfig("site|description"),
 			"author" => "",
 		], $data, [
 			"title" => "{$title} - {$name}",

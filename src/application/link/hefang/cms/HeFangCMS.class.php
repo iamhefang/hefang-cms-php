@@ -4,6 +4,7 @@
 namespace link\hefang\cms;
 
 
+use link\hefang\cms\admin\models\SettingModel;
 use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\entities\Router;
 use link\hefang\mvc\Mvc;
@@ -13,11 +14,16 @@ class HeFangCMS extends SimpleApplication
 {
 	const PREFIX_APIS = "/apis/";
 
+	public static function searchKey(): string
+	{
+		return Mvc::getProperty("project.search.field.name", "search");
+	}
+
 	public function onInit()
 	{
-		return [
-			"site|name" => "何方CMS"
-		];
+		$settings = SettingModel::allValues();
+		Mvc::getLogger()->debug(print_r($settings, true), "初始化时读取到配置项");
+		return $settings;
 	}
 
 	public function onRequest(string $path)

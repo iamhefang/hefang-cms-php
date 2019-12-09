@@ -9,8 +9,12 @@
 	<meta name="description" content="{:description}">
 	<meta name="author" content="{:author}">
 	<title>{:title}</title>
+	<script src="{:themeUrl}/scripts/jquery-3.4.1.min.js"></script>
+	<link rel="stylesheet" href="{:themeUrl}/styles/index.css">
 </head>
 <body>
-
+{if:debug}
+{inc:debug/index.php}
+{endif}
 </body>
 </html>

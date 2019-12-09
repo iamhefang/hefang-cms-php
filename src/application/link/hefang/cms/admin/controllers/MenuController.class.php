@@ -4,6 +4,7 @@
 namespace link\hefang\cms\admin\controllers;
 
 
+use Exception;
 use link\hefang\cms\admin\models\MenuModel;
 use link\hefang\cms\user\models\AccountModel;
 use link\hefang\cms\user\models\RoleModel;
@@ -12,7 +13,6 @@ use link\hefang\helpers\CollectionHelper;
 use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\controllers\BaseController;
 use link\hefang\mvc\databases\Sql;
-use link\hefang\mvc\exceptions\ModelException;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\Mvc;
 use link\hefang\mvc\views\BaseView;
@@ -25,7 +25,7 @@ class MenuController extends BaseController
 			$pager = MenuModel::pager($this->_pageIndex(), $this->_pageSize(), null, "enable = TRUE", [$this->_sort()]);
 			return $this->_restApiOk($pager);
 		} catch (SqlException $e) {
-			return $this->_restApiServerError($e, "读取数据时出现异常");
+			return $this->_restApiServerError($e);
 		}
 	}
 
@@ -48,10 +48,8 @@ class MenuController extends BaseController
 			}
 			$res = $model->setEnable(false)->update(["enable"]);
 			return $res ? $this->_restApiOk() : $this->_restNotModified();
-		} catch (ModelException $e) {
-			return $this->_restApiServerError($e, "解析数据时出现异常");
-		} catch (SqlException $e) {
-			return $this->_restApiServerError($e, "读取数据时出现异常");
+		} catch (Exception $e) {
+			return $this->_restApiServerError($e);
 		}
 	}
 
@@ -89,10 +87,8 @@ class MenuController extends BaseController
 				Mvc::getCache()->remove("all-menus");
 			}
 			return $res ? $this->_restApiOk() : $this->_restNotModified();
-		} catch (ModelException $e) {
-			return $this->_restApiServerError($e, "解析数据时出现异常");
-		} catch (SqlException $e) {
-			return $this->_restApiServerError($e, "读取数据时出现异常");
+		} catch (Exception $e) {
+			return $this->_restApiServerError($e);
 		}
 	}
 
@@ -101,7 +97,7 @@ class MenuController extends BaseController
 		try {
 			return $this->_restApiOk(MenuModel::all());
 		} catch (SqlException $e) {
-			return $this->_restApiServerError($e, "读取数据时出现异常");
+			return $this->_restApiServerError($e);
 		}
 	}
 
@@ -159,10 +155,8 @@ class MenuController extends BaseController
 				return $this->_restApiNotFound("要绑定菜单的角色不存在或已被禁用");
 			}
 			return $role->bindMenus($menuIds) ? $this->_restApiOk() : $this->_restNotModified();
-		} catch (ModelException $e) {
-			return $this->_restApiServerError($e, "解析角色数据时异常");
-		} catch (SqlException $e) {
-			return $this->_restApiServerError($e, "读取角色数据时异常");
+		} catch (Exception $e) {
+			return $this->_restApiServerError($e);
 		}
 	}
 }

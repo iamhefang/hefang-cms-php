@@ -36,3 +36,4 @@ libraries/
 *.iml
 
 /src/data/
+node_modules/
