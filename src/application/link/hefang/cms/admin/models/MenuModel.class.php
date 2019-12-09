@@ -4,14 +4,15 @@
 namespace link\hefang\cms\admin\models;
 
 
+use link\hefang\cms\common\helpers\CacheHelper;
 use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\databases\SqlSort;
-use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\models\BaseModel;
-use link\hefang\mvc\Mvc;
 
 class MenuModel extends BaseModel
 {
+	const CACHE_KEY_ALL_MENUS = "all-menus";
+
 	private $id = "";
 	private $parentId;
 	private $name = "";
@@ -188,29 +189,25 @@ class MenuModel extends BaseModel
 	/**
 	 * @param bool $useCache
 	 * @return array
-	 * @throws SqlException
 	 */
 	public static function all(bool $useCache = true): array
 	{
-		$cache = Mvc::getCache()->get("all-menus");
-		if (!Mvc::isDebug() && $useCache && is_array($cache) && count($cache) > 0) {
-			return $cache;
-		}
-		$functions = [];
-		$pager = MenuModel::pager(1, 1000, null, "enable = TRUE", [new SqlSort("sort")]);
-		foreach ($pager->getData() as $item) {
-			if (!($item instanceof MenuModel)) continue;
-			if (StringHelper::isNullOrBlank($item->getParentId())) {
-				if (array_key_exists($item->getId(), $functions)) {
-					$item->children = $functions[$item->getId()]->children;
+		return CacheHelper::cacheOrFetch(self::CACHE_KEY_ALL_MENUS, function () {
+			$functions = [];
+			$pager = MenuModel::pager(1, 1000, null, "enable = TRUE", [new SqlSort("sort")]);
+			foreach ($pager->getData() as $item) {
+				if (!($item instanceof MenuModel)) continue;
+				if (StringHelper::isNullOrBlank($item->getParentId())) {
+					if (array_key_exists($item->getId(), $functions)) {
+						$item->children = $functions[$item->getId()]->children;
+					}
+					$functions[$item->getId()] = $item;
+				} else {
+					$functions[$item->getParentId()]->children[] = $item;
 				}
-				$functions[$item->getId()] = $item;
-			} else {
-				$functions[$item->getParentId()]->children[] = $item;
 			}
-		}
-		$all = array_values($functions);
-		Mvc::getCache()->set("all-menus", $all);
-		return $all;
+			$all = array_values($functions);
+			return $all;
+		}, -1, $useCache);
 	}
 }

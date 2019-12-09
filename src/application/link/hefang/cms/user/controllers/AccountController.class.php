@@ -7,6 +7,7 @@ namespace link\hefang\cms\user\controllers;
 use link\hefang\cms\admin\models\MenuModel;
 use link\hefang\cms\user\models\AccountModel;
 use link\hefang\helpers\HashHelper;
+use link\hefang\helpers\TimeHelper;
 use link\hefang\mvc\controllers\BaseController;
 use link\hefang\mvc\exceptions\ModelException;
 use link\hefang\mvc\exceptions\SqlException;
@@ -17,17 +18,17 @@ use link\hefang\mvc\views\BaseView;
 class AccountController extends BaseController
 {
 
-//	public function initRoot(): BaseView
-//	{
-//		$root = new AccountModel();
-//		$root->setId("root")
-//			->setName("Administrator")
-//			->setRegisterTime(TimeHelper::formatMillis())
-//			->setRegisterType("System Init")
-//			->setPassword(HashHelper::passwordHash(sha1("111111") . md5("111111"), "(*lfwekjfO*gklswjefwFDSefwgwlekjf"))
-//			->setRoleId("admin");
-//		return $this->_text($root->insert());
-//	}
+	public function initRoot(): BaseView
+	{
+		$root = new AccountModel();
+		$root->setId("root")
+			->setName("Administrator")
+			->setRegisterTime(TimeHelper::formatMillis())
+			->setRegisterType("System Init")
+			->setPassword(HashHelper::passwordHash(sha1("111111") . md5("111111"), "(*lfwekjfO*gklswjefwFDSefwgwlekjf"))
+			->setRoleId("admin");
+		return $this->_text($root->insert());
+	}
 
 	/**
 	 * 登录接口

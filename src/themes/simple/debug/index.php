@@ -34,6 +34,7 @@
 		}
 
 		.debug-info {
+			display: none;
 			height: 93vh;
 			overflow: auto;
 			box-shadow: 0 0 10px black;

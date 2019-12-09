@@ -51,7 +51,7 @@ class SettingController extends BaseController implements IDULG
 	{
 		$category = $this->_request("category");
 		$search = $this->_request(HeFangCMS::searchKey());
-		$where = "enable = TRUE";
+		$where = "enable = TRUE AND show_in_center = FALSE";
 		if (!StringHelper::isNullOrBlank($category)) {
 			$where .= "category = '{$category}'";
 		}

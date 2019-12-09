@@ -6,6 +6,7 @@ namespace link\hefang\cms\admin\controllers;
 
 use link\hefang\cms\common\helpers\CacheHelper;
 use link\hefang\mvc\controllers\BaseController;
+use link\hefang\mvc\Mvc;
 use link\hefang\mvc\views\BaseView;
 
 class ThemeController extends BaseController
@@ -18,7 +19,9 @@ class ThemeController extends BaseController
 			foreach ($themeDirs as $themeDir) {
 				$file = join([PATH_THEMES, $themeDir, "manifest.json"], DS);
 				if ($themeDir === "." || $themeDir === ".." || !is_file($file)) continue;
-				$themeArray[] = json_decode(file_get_contents($file));
+				$theme = json_decode(file_get_contents($file), true);
+				$theme["isCurrent"] = Mvc::getConfig("site|theme") === $theme["id"];
+				$themeArray[] = $theme;
 			}
 			return $themeArray;
 		});

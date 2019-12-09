@@ -22,6 +22,7 @@ class SettingModel extends BaseModel
 	private $description = null;
 	private $attribute = null;
 	private $nullable = true;
+	private $showInCenter = true;
 	private $sort = 0;
 
 	/**
@@ -276,7 +277,24 @@ class SettingModel extends BaseModel
 			"description",
 			"attribute",
 			"nullable",
+			"show_in_center" => "showInCenter",
 			"enable",
 		];
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isShowInCenter(): bool
+	{
+		return $this->showInCenter;
+	}
+
+	/**
+	 * @param bool $showInCenter
+	 */
+	public function setShowInCenter(bool $showInCenter): void
+	{
+		$this->showInCenter = $showInCenter;
 	}
 }

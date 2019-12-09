@@ -5,7 +5,6 @@ namespace link\hefang\cms\content\models;
 
 
 use link\hefang\cms\user\models\AccountModel;
-use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\exceptions\ModelException;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\models\BaseModel;
@@ -26,7 +25,7 @@ class ArticleModel extends BaseModel
 	private $approvalCount = 0;
 	private $opposeCount = 0;
 	private $isDraft = true;
-	private $categoryId = "";
+	private $categoryId = null;
 	private $isPrivate = false;
 	private $enable = true;
 	private $tags = [];
@@ -268,18 +267,18 @@ class ArticleModel extends BaseModel
 	}
 
 	/**
-	 * @return string
+	 * @return string|null
 	 */
-	public function getCategoryId(): string
+	public function getCategoryId()
 	{
 		return $this->categoryId;
 	}
 
 	/**
-	 * @param string $categoryId
+	 * @param string|null $categoryId
 	 * @return ArticleModel
 	 */
-	public function setCategoryId(string $categoryId): ArticleModel
+	public function setCategoryId($categoryId): ArticleModel
 	{
 		$this->categoryId = $categoryId;
 		return $this;
@@ -398,7 +397,7 @@ class ArticleModel extends BaseModel
 	 */
 	public function getCategoryName()
 	{
-		if ($this->categoryName === null) {
+		if ($this->categoryName && !$this->categoryId) {
 			$category = CategoryModel::get($this->getCategoryId());
 			if (($category instanceof CategoryModel)) {
 				$this->categoryName = $category->getName();

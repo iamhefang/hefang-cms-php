@@ -4,6 +4,7 @@
 namespace link\hefang\cms\content\controllers;
 
 use link\hefang\cms\content\models\ArticleModel;
+use link\hefang\cms\HeFangCMS;
 use link\hefang\cms\user\models\AccountModel;
 use link\hefang\guid\GUKey;
 use link\hefang\helpers\ParseHelper;
@@ -73,30 +74,41 @@ class ArticleController extends BaseController
 	public function list(): BaseView
 	{
 		$login = $this->_getLogin();
-		$search = $this->_request(Mvc::getProperty("project.search.field.name", "search"));
+		$search = $this->_request(HeFangCMS::searchKey());
 		$category = $this->_request("category");
-
 		$tag = $this->_request("tag");
+		$where = [];
 
-		if ($login->isAdmin()) {
-			$enable = ParseHelper::parseBoolean($this->_request("showDisabled", "false"));
-			$author = $this->_request("author");
-			$where = "enable = " . ($enable ? "TRUE" : "FALSE");
-			if (!StringHelper::isNullOrBlank($author) && strlen($author) === 40) {
-				$where .= " AND `author` = '{$author}'";
+		if ($login instanceof AccountModel) {
+			if ($login->isAdmin()) {
+				$showDisabled = $this->_request("showDisabled");
+				$author = $this->_request("author");
+				if (!StringHelper::isNullOrBlank($showDisabled)) {
+					$showDisabled = ParseHelper::parseBoolean($showDisabled);
+					if (!$showDisabled) {
+						$where[] = "enable = TRUE";
+					}
+				}
+				if (!StringHelper::isNullOrBlank($author) && strlen($author) === 40) {
+					$where[] = "`author` = '{$author}'";
+				}
+			} else {
+				$where[] = "`author`='{$login->getId()}'";
 			}
 		} else {
-			$where = "enable = TRUE AND `author`='{$login->getId()}'";
+			$where[] = "enable = TRUE";
 		}
 
-		if (!StringHelper::isNullOrBlank($category)) {
-			$categoryTable = Mvc::getTablePrefix() . "category";
-			$where .= " AND `{$categoryTable}` = '{$category}'";
+		$categoryTable = Mvc::getTablePrefix() . "category";
+		if (!StringHelper::isNullOrBlank($category) && $category !== "all") {
+			$where .= "`{$categoryTable}` = '{$category}'";
+		} else if ($category == "null") {
+			$where .= "`{$categoryTable}` IS NULL";
 		}
 
 		if (!StringHelper::isNullOrBlank($tag)) {
 			$tagTable = Mvc::getTablePrefix() . "tags";
-			$where .= " AND `id` IN (SELECT content_id FROM `{$tagTable}` WHERE `tag` = '{$tag}')";
+			$where[] = "`id` IN (SELECT content_id FROM `{$tagTable}` WHERE `tag` = '{$tag}')";
 		}
 
 		try {
@@ -104,7 +116,7 @@ class ArticleController extends BaseController
 				$this->_pageIndex(),
 				$this->_pageSize(),
 				$search,
-				$where
+				join(" AND ", $where)
 			);
 			return $this->_restApiOk($data);
 		} catch (\Exception $exception) {

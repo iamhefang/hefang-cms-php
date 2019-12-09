@@ -1,6 +1,6 @@
 {
 	"$schema": "https://hefang.link/schema/hefang-cms/theme.schema.json?v=6",
-	"id": "hefang-cms-theme-simple",
+	"id": "simple",
 	"name": "简约白",
 	"version": "1.0.0",
 	"supportVersion": "*",
