@@ -8,7 +8,6 @@ use link\hefang\cms\user\models\AccountModel;
 use link\hefang\mvc\exceptions\ModelException;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\models\BaseModel;
-use link\hefang\mvc\Mvc;
 
 class ArticleModel extends BaseModel
 {
@@ -363,13 +362,10 @@ class ArticleModel extends BaseModel
 	public function getTags(): array
 	{
 		if (count($this->tags) < 1) {
-			$this->tags = self::database()->pager(
-				Mvc::getTablePrefix() . "content_tag",
-				1,
-				100,
-				null,
-				"content_id = '{$this->getId()}'"
-			)->getData();
+			$tags = TagModel::pager(1, 100, null, "content_id = '{$this->getId()}'")->getData();
+			$this->tags = array_map(function (TagModel $tag) {
+				return $tag->getTag();
+			}, $tags);
 		}
 		return $this->tags;
 	}
