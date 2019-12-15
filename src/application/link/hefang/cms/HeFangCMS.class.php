@@ -5,6 +5,8 @@ namespace link\hefang\cms;
 
 
 use link\hefang\cms\admin\models\SettingModel;
+use link\hefang\cms\common\helpers\CacheHelper;
+use link\hefang\cms\content\models\ArticleModel;
 use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\entities\Router;
 use link\hefang\mvc\Mvc;
@@ -32,6 +34,12 @@ class HeFangCMS extends SimpleApplication
 		if (StringHelper::startsWith($path, true, self::PREFIX_APIS)) {
 			$path = substr($path, strlen(self::PREFIX_APIS) - 1);
 			return Router::parsePath($path);
+		}
+		$article = CacheHelper::cacheOrFetch($path, function () use ($path) {
+			return ArticleModel::find("`path` = '{$path}'");
+		});
+		if ($article instanceof ArticleModel && $article->isExist() && $article->isEnable()) {
+			return new Router("main", "home", "article", $article->getId());
 		}
 		return parent::onRequest($path);
 	}
