@@ -6,6 +6,7 @@ namespace link\hefang\cms\content\controllers;
 
 use link\hefang\cms\content\models\TagModel;
 use link\hefang\cms\HeFangCMS;
+use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\controllers\BaseController;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\views\BaseView;
@@ -38,11 +39,17 @@ class TagController extends BaseController
 	public function list(): BaseView
 	{
 		$search = $this->_request(HeFangCMS::searchKey());
+		$type = $this->_request("type");
+		$where = null;
+		if (!StringHelper::isNullOrBlank($type)) {
+			$where = "`type` = '{$type}'";
+		}
 		try {
 			return $this->_restApiOk(TagModel::pager(
 				$this->_pageIndex(),
 				$this->_pageSize(100),
-				$search
+				$search,
+				$where
 			));
 		} catch (SqlException $e) {
 			return $this->_restApiServerError($e);

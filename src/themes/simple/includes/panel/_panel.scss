@@ -1,0 +1,29 @@
+
+$panel-header-height: 40px;
+.panel {
+	&-header {
+		display: flex;
+		flex-direction: row;
+		height: $panel-header-height;
+		line-height: $panel-header-height;
+		background: #e0e0e0;
+	}
+
+	&-icon {
+
+	}
+
+	&-title {
+		flex: 1;
+		padding-left: 10px;
+	}
+
+	&-body {
+
+	}
+
+	&-content {
+		padding: 10px;
+		box-sizing: border-box;
+	}
+}

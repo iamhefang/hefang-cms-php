@@ -11,6 +11,26 @@ class TagModel extends BaseModel
 {
 	private $contentId = "";
 	private $tag = "";
+	private $type = null;
+
+	/**
+	 * @return null|string
+	 */
+	public function getType()
+	{
+		return $this->type;
+	}
+
+	/**
+	 * @param null|string $type
+	 * @return TagModel
+	 */
+	public function setType($type)
+	{
+		$this->type = $type;
+		return $this;
+	}
+
 
 	public static function table(): string
 	{
