@@ -13,6 +13,7 @@ class CategoryModel extends BaseModel
 	private $keywords = "";
 	private $description = "";
 	private $enable = true;
+	private $type = "article";
 
 	/**
 	 * @return string
@@ -128,5 +129,23 @@ class CategoryModel extends BaseModel
 			"description",
 			"enable"
 		];
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getType(): string
+	{
+		return $this->type;
+	}
+
+	/**
+	 * @param string $type
+	 * @return CategoryModel
+	 */
+	public function setType(string $type): CategoryModel
+	{
+		$this->type = $type;
+		return $this;
 	}
 }

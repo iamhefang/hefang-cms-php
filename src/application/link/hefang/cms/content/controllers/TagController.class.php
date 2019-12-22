@@ -47,7 +47,7 @@ class TagController extends BaseController
 		try {
 			return $this->_restApiOk(TagModel::pager(
 				$this->_pageIndex(),
-				$this->_pageSize(100),
+				$this->_pageSize(),
 				$search,
 				$where
 			));

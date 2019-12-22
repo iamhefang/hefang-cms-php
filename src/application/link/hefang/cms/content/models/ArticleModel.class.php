@@ -27,6 +27,9 @@ class ArticleModel extends BaseModel
 	private $categoryId = null;
 	private $isPrivate = false;
 	private $enable = true;
+	private $extra = "";
+
+
 	private $tags = [];
 	private $categoryName = null;
 	private $authorName = null;
@@ -351,7 +354,8 @@ class ArticleModel extends BaseModel
 			"is_draft" => "isDraft",
 			"category_id" => "categoryId",
 			"is_private" => "isPrivate",
-			"enable"
+			"enable",
+			"extra"
 		];
 	}
 
@@ -400,5 +404,23 @@ class ArticleModel extends BaseModel
 			}
 		}
 		return $this->categoryName;
+	}
+
+	/**
+	 * @return string|string
+	 */
+	public function getExtra()
+	{
+		return $this->extra;
+	}
+
+	/**
+	 * @param string|string $extra
+	 * @return ArticleModel
+	 */
+	public function setExtra($extra): ArticleModel
+	{
+		$this->extra = $extra;
+		return $this;
 	}
 }

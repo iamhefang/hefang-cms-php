@@ -22,6 +22,7 @@ class CategoryController extends BaseController
 		$name = $this->_post("name");
 		$keywords = $this->_post("keywords");
 		$description = $this->_post("description");
+		$type = $this->_post("type", "article");
 
 		if (StringHelper::isNullOrBlank($id)) {
 			return $this->_restApiBadRequest("分类标识不能为空");
@@ -31,11 +32,15 @@ class CategoryController extends BaseController
 			return $this->_restApiBadRequest("分类名不能为空");
 		}
 
+		if (!in_array($type, ["article", "page"])) {
+			return $this->_restApiBadRequest("类型参数异常");
+		}
 
 		$model = new CategoryModel();
 		$model->setId($id)
 			->setName($name)
 			->setKeywords($keywords)
+			->setType($type)
 			->setDescription($description);
 		try {
 			return $model->insert() ? $this->_restApiCreated() : $this->_restNotModified();
@@ -51,12 +56,17 @@ class CategoryController extends BaseController
 
 	public function list(): BaseView
 	{
+		$type = $this->_request("type");
+		$where = "enable = TRUE";
+		if (!StringHelper::isNullOrBlank($type)) {
+			$where .= " AND `type` = '{$type}'";
+		}
 		try {
 			return $this->_restApiOk(CategoryModel::pager(
 				$this->_pageIndex(),
 				$this->_pageSize(),
 				null,
-				"enable = TRUE"
+				$where
 			));
 		} catch (SqlException $e) {
 			return $this->_restApiServerError($e);
