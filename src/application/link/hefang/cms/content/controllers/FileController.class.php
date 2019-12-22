@@ -5,12 +5,17 @@ namespace link\hefang\cms\content\controllers;
 
 
 use Exception;
+use link\hefang\cms\common\helpers\AccountHelper;
 use link\hefang\cms\content\models\FileModel;
+use link\hefang\cms\content\models\TagModel;
+use link\hefang\cms\HeFangCMS;
+use link\hefang\cms\user\models\AccountModel;
 use link\hefang\guid\GUKey;
 use link\hefang\helpers\CollectionHelper;
 use link\hefang\helpers\ParseHelper;
+use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\controllers\BaseController;
-use link\hefang\mvc\exceptions\ModelException;
+use link\hefang\mvc\databases\Sql;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\interfaces\IDULG;
 use link\hefang\mvc\views\BaseView;
@@ -67,6 +72,20 @@ class FileController extends BaseController implements IDULG
 			->setHash("sha1." . $hash)
 			->setEnable(true);
 		try {
+			$tagTable = TagModel::table();
+			if (is_array($tags) && count($tags) > 0) {
+				$sqls = [];
+				foreach ($tags as $tag) {
+					$sqls[] = new Sql(
+						"INSERT INTO `{$tagTable}`(`content_id`,`tag`,`type`) values (:id,:tag,'file')",
+						[
+							"id" => $model->getId(),
+							"tag" => $tag
+						]
+					);
+				}
+				TagModel::database()->transaction($sqls);
+			}
 			return $model->insert() ? $this->_restApiOk($model) : $this->_restFailedUnknownReason();
 		} catch (Exception $e) {
 			return $this->_restApiServerError($e, "保存文件信息时出错");
@@ -79,7 +98,24 @@ class FileController extends BaseController implements IDULG
 	 */
 	public function delete(): BaseView
 	{
-		// TODO: Implement delete() method.
+		$user = AccountHelper::checkLogin($this);
+		$ids = $this->_request("ids");
+		if (!is_array($ids)) {
+			return $this->_restApiBadRequest();
+		}
+		if (!$user->isAdmin() && count($ids) > 1) {
+			return $this->_restApiForbidden("您无权批量删除文件");
+		}
+		$id = "'" . join("','", $ids);
+		try {
+			if (!$user->isAdmin()) {
+				$model = FileModel::get($ids[0]);
+			}
+			$result = FileModel::database()->update(FileModel::table(), ["enable" => false], "id IN ({$id})");
+			return $result ? $this->_restApiOk($result) : $this->_restNotModified();
+		} catch (SqlException $e) {
+			return $this->_restApiServerError($e);
+		}
 	}
 
 	/**
@@ -88,6 +124,7 @@ class FileController extends BaseController implements IDULG
 	 */
 	public function update(): BaseView
 	{
+
 		// TODO: Implement update() method.
 	}
 
@@ -97,7 +134,43 @@ class FileController extends BaseController implements IDULG
 	 */
 	public function list(): BaseView
 	{
-		// TODO: Implement list() method.
+		$search = $this->_request(HeFangCMS::searchKey());
+		$tag = $this->_request("tag");
+		$type = $this->_request("type");
+		$user = $this->_getLogin();
+		$where = "enable = TRUE";
+		if (!($user instanceof AccountModel)) {
+			return $this->_restApiUnauthorized();
+		}
+		if ($user->isAdmin()) {
+			$uploaderId = $this->_request("uploaderId");
+		} else {
+			$uploaderId = $user->getId();
+		}
+
+		if (!StringHelper::isNullOrBlank($tag)) {
+			$tagTable = TagModel::table();
+			$where .= " AND id IN (SELECT content_id FROM `{$tagTable}` WHERE `tag`='{$tag}' AND `type` = 'file')";
+		}
+
+		if (!StringHelper::isNullOrBlank($type)) {
+			$where .= " AND `type` = '{$type}'";
+		}
+
+		if (!StringHelper::isNullOrBlank($uploaderId)) {
+			$where .= " AND uploader_id = '{$uploaderId}'";
+		}
+		try {
+			return $this->_restApiOk(FileModel::pager(
+				$this->_pageIndex(),
+				$this->_pageSize(),
+				$search,
+				$where,
+				[$this->_sort()]
+			));
+		} catch (SqlException $e) {
+			return $this->_restApiServerError($e);
+		}
 	}
 
 	/**
@@ -107,6 +180,30 @@ class FileController extends BaseController implements IDULG
 	 */
 	public function get(string $id = null): BaseView
 	{
-		// TODO: Implement get() method.
+		$id = $this->_request("id", $id);
+		$type = strtolower($this->_request("type", "model"));
+		try {
+			$model = FileModel::get($id);
+			if (!($model instanceof FileModel) || !$model->isExist() || !$model->isEnable()) {
+				return $this->_restApiNotFound("请求的文件不存在或已被删除");
+			}
+
+			$user = $this->_getLogin();
+			if (!$model->isIsPublic()) {
+				if (!($user instanceof AccountModel)) {
+					return $this->_restApiUnauthorized();
+				}
+				if (!$user->isAdmin() && $user->getId() !== $model->getUploaderId()) {
+					return $this->_restApiForbidden("您无权访问该文件");
+				}
+			}
+
+			if ($type === "model") {
+				return $this->_restApiOk($model);
+			}
+			return $this->_file($model->getSavePath(), $model->getType());
+		} catch (Exception $e) {
+			return $this->_restApiServerError($e);
+		}
 	}
 }
