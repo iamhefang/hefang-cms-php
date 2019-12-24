@@ -16,6 +16,7 @@ use link\hefang\helpers\ParseHelper;
 use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\controllers\BaseController;
 use link\hefang\mvc\databases\Sql;
+use link\hefang\mvc\exceptions\ModelException;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\interfaces\IDULG;
 use link\hefang\mvc\views\BaseView;
@@ -113,7 +114,7 @@ class FileController extends BaseController implements IDULG
 			}
 			$result = FileModel::database()->update(FileModel::table(), ["enable" => false], "id IN ({$id})");
 			return $result ? $this->_restApiOk($result) : $this->_restNotModified();
-		} catch (SqlException $e) {
+		} catch (Exception $e) {
 			return $this->_restApiServerError($e);
 		}
 	}

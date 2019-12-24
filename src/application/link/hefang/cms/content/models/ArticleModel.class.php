@@ -28,7 +28,25 @@ class ArticleModel extends BaseModel
 	private $isPrivate = false;
 	private $enable = true;
 	private $extra = "";
+	private $type = "article";
 
+	/**
+	 * @return string
+	 */
+	public function getType()
+	{
+		return $this->type;
+	}
+
+	/**
+	 * @param string $type
+	 * @return ArticleModel
+	 */
+	public function setType(string $type)
+	{
+		$this->type = $type;
+		return $this;
+	}
 
 	private $tags = [];
 	private $categoryName = null;

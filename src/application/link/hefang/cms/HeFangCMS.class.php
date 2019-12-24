@@ -35,11 +35,14 @@ class HeFangCMS extends SimpleApplication
 			$path = substr($path, strlen(self::PREFIX_APIS) - 1);
 			return Router::parsePath($path);
 		}
-		$article = CacheHelper::cacheOrFetch($path, function () use ($path) {
-			return ArticleModel::find("`path` = '{$path}'");
-		});
-		if ($article instanceof ArticleModel && $article->isExist() && $article->isEnable()) {
-			return new Router("main", "home", "article", $article->getId());
+		// /.html
+		if (strlen($path) > 6) {
+			$article = CacheHelper::cacheOrFetch($path, function () use ($path) {
+				return ArticleModel::find("`path` = '{$path}'");
+			});
+			if ($article instanceof ArticleModel && $article->isExist() && $article->isEnable()) {
+				return new Router("main", "home", "article", $article->getId());
+			}
 		}
 		return parent::onRequest($path);
 	}
