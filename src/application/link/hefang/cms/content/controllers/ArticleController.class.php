@@ -17,6 +17,13 @@ use link\hefang\mvc\views\BaseView;
 
 class ArticleController extends BaseController
 {
+	/**
+	 * @method GET
+	 * @method POST
+	 * @needLogin 需要登录
+	 * @param string|null $id
+	 * @return BaseView
+	 */
 	public function set(string $id = null): BaseView
 	{
 		$id = $this->_request("id", $id);
