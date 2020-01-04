@@ -16,7 +16,6 @@ use link\hefang\helpers\ParseHelper;
 use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\controllers\BaseController;
 use link\hefang\mvc\databases\Sql;
-use link\hefang\mvc\exceptions\ModelException;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\interfaces\IDULG;
 use link\hefang\mvc\views\BaseView;
