@@ -4,65 +4,46 @@
 namespace link\hefang\cms\content\controllers;
 
 
-use link\hefang\cms\content\models\TagModel;
+use link\hefang\cms\common\controllers\BaseCmsController;
+use link\hefang\cms\content\models\ContentTagModel;
 use link\hefang\cms\HeFangCMS;
 use link\hefang\helpers\StringHelper;
-use link\hefang\mvc\controllers\BaseController;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\views\BaseView;
 
-class TagController extends BaseController
+class TagController extends BaseCmsController
 {
 
 	/**
-	 * 删除数据
-	 * @return BaseView
-	 */
-	public function delete(): BaseView
-	{
-		// TODO: Implement delete() method.
-	}
-
-	/**
-	 * 更新数据
-	 * @return BaseView
-	 */
-	public function update(): BaseView
-	{
-		// TODO: Implement update() method.
-	}
-
-	/**
 	 * 查询数据列表
+	 * @param string|null $cmd
 	 * @return BaseView
 	 */
-	public function list(): BaseView
+	public function list(string $cmd = null): BaseView
 	{
-		$search = $this->_request(HeFangCMS::searchKey());
-		$type = $this->_request("type");
-		$where = null;
+		$query = $this->_request(HeFangCMS::queryKey());
+		$type = $this->_request("type", $cmd);
+		$where = [];
+		$querySql = ContentTagModel::query2sql($query);
+
 		if (!StringHelper::isNullOrBlank($type)) {
-			$where = "`type` = '{$type}'";
+			$where[] = "`type` = '{$type}'";
 		}
+
+		if ($querySql) {
+			$where[] = $querySql;
+		}
+
+		$where = empty($where) ? null : join(" AND ", $where);
+
 		try {
-			return $this->_restApiOk(TagModel::pager(
+			return $this->_restApiOk(ContentTagModel::pager(
 				$this->_pageIndex(),
 				$this->_pageSize(),
-				$search,
 				$where
 			));
 		} catch (SqlException $e) {
 			return $this->_restApiServerError($e);
 		}
-	}
-
-	/**
-	 * 获取一条数据详情
-	 * @param string|null $id 要获取详情的数据的主键
-	 * @return BaseView
-	 */
-	public function get(string $id = null): BaseView
-	{
-		// TODO: Implement get() method.
 	}
 }

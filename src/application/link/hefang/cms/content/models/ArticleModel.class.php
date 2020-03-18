@@ -5,11 +5,12 @@ namespace link\hefang\cms\content\models;
 
 
 use link\hefang\cms\user\models\AccountModel;
-use link\hefang\mvc\exceptions\ModelException;
-use link\hefang\mvc\exceptions\SqlException;
-use link\hefang\mvc\models\BaseModel;
+use link\hefang\mvc\models\BaseModel2;
+use link\hefang\mvc\models\ModelField as MF;
+use link\hefang\mvc\Mvc;
+use Throwable;
 
-class ArticleModel extends BaseModel
+class ArticleModel extends BaseModel2
 {
 	private $id = "";
 	private $title = "";
@@ -17,8 +18,8 @@ class ArticleModel extends BaseModel
 	private $keywords = "";
 	private $description = "";
 	private $content = "";
-	private $postTime = 0;
-	private $lastAlterTime = 0;
+	private $postTime = null;
+	private $lastAlterTime = null;
 	private $authorId = "";
 	private $readCount = 0;
 	private $approvalCount = 0;
@@ -29,6 +30,32 @@ class ArticleModel extends BaseModel
 	private $enable = true;
 	private $extra = "";
 	private $type = "article";
+	private $tags = [];
+	private $categoryName = null;
+	private $authorName = null;
+
+	public static function fields(): array
+	{
+		return [
+			MF::prop("id")->primaryKey()->trim(),
+			MF::prop("title")->trim(),
+			MF::prop("path")->trim(),
+			MF::prop("keywords")->trim(),
+			MF::prop("description")->trim(),
+			MF::prop("content"),
+			MF::prop("postTime"),
+			MF::prop("lastAlterTime"),
+			MF::prop("authorId")->trim(),
+			MF::prop("readCount")->type(MF::TYPE_INT),
+			MF::prop("approvalCount")->type(MF::TYPE_INT),
+			MF::prop("opposeCount")->type(MF::TYPE_INT),
+			MF::prop("isDraft")->type(MF::TYPE_BOOL),
+			MF::prop("categoryId")->trim(),
+			MF::prop("isPrivate")->type(MF::TYPE_BOOL),
+			MF::prop("enable")->type(MF::TYPE_BOOL),
+			MF::prop("extra")
+		];
+	}
 
 	/**
 	 * @return string
@@ -45,28 +72,6 @@ class ArticleModel extends BaseModel
 	public function setType(string $type)
 	{
 		$this->type = $type;
-		return $this;
-	}
-
-	private $tags = [];
-	private $categoryName = null;
-	private $authorName = null;
-
-	/**
-	 * @return string
-	 */
-	public function getId(): string
-	{
-		return $this->id;
-	}
-
-	/**
-	 * @param string $id
-	 * @return ArticleModel
-	 */
-	public function setId(string $id): ArticleModel
-	{
-		$this->id = $id;
 		return $this;
 	}
 
@@ -161,56 +166,38 @@ class ArticleModel extends BaseModel
 	}
 
 	/**
-	 * @return int
+	 * @return string|null
 	 */
-	public function getPostTime(): int
+	public function getPostTime()
 	{
 		return $this->postTime;
 	}
 
 	/**
-	 * @param int $postTime
+	 * @param string $postTime
 	 * @return ArticleModel
 	 */
-	public function setPostTime(int $postTime): ArticleModel
+	public function setPostTime(string $postTime): ArticleModel
 	{
 		$this->postTime = $postTime;
 		return $this;
 	}
 
 	/**
-	 * @return int
+	 * @return string|null
 	 */
-	public function getLastAlterTime(): int
+	public function getLastAlterTime()
 	{
 		return $this->lastAlterTime;
 	}
 
 	/**
-	 * @param int $lastAlterTime
+	 * @param string $lastAlterTime
 	 * @return ArticleModel
 	 */
-	public function setLastAlterTime(int $lastAlterTime): ArticleModel
+	public function setLastAlterTime(string $lastAlterTime): ArticleModel
 	{
 		$this->lastAlterTime = $lastAlterTime;
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getAuthorId(): string
-	{
-		return $this->authorId;
-	}
-
-	/**
-	 * @param string $authorId
-	 * @return ArticleModel
-	 */
-	public function setAuthorId(string $authorId): ArticleModel
-	{
-		$this->authorId = $authorId;
 		return $this;
 	}
 
@@ -287,24 +274,6 @@ class ArticleModel extends BaseModel
 	}
 
 	/**
-	 * @return string|null
-	 */
-	public function getCategoryId()
-	{
-		return $this->categoryId;
-	}
-
-	/**
-	 * @param string|null $categoryId
-	 * @return ArticleModel
-	 */
-	public function setCategoryId($categoryId): ArticleModel
-	{
-		$this->categoryId = $categoryId;
-		return $this;
-	}
-
-	/**
 	 * @return bool
 	 */
 	public function isPrivate(): bool
@@ -349,79 +318,117 @@ class ArticleModel extends BaseModel
 		return $map;
 	}
 
-	public static function primaryKeyFields(): array
-	{
-		return ["id"];
-	}
-
-	public static function fields(): array
-	{
-		return [
-			"id",
-			"title",
-			"path",
-			"keywords",
-			"description",
-			"content",
-			"post_time" => "postTime",
-			"last_alter_time" => "lastAlterTime",
-			"author_id" => "authorId",
-			"read_count" => "readCount",
-			"approval_count" => "approvalCount",
-			"oppose_count" => "opposeCount",
-			"is_draft" => "isDraft",
-			"category_id" => "categoryId",
-			"is_private" => "isPrivate",
-			"enable",
-			"extra"
-		];
-	}
-
 	/**
 	 * @return array
-	 * @throws SqlException
 	 */
 	public function getTags(): array
 	{
-		if (count($this->tags) < 1) {
-			$tags = TagModel::pager(1, 100, null, "content_id = '{$this->getId()}'")->getData();
-			$this->tags = array_map(function (TagModel $tag) {
-				return $tag->getTag();
-			}, $tags);
+		if (empty($this->tags)) {
+			try {
+				$tags = ContentTagModel::pager(1, 100, "`content_id` = '{$this->getId()}'")->getData();
+				$this->tags = array_map(function (ContentTagModel $tag) {
+					return $tag->getTag();
+				}, $tags);
+			} catch (Throwable $e) {
+				Mvc::getLogger()->error($e->getMessage(), "获取文章标签时异常", $e);
+				$this->tags = [];
+			}
 		}
 		return $this->tags;
 	}
 
 	/**
 	 * @return string
-	 * @throws ModelException
-	 * @throws SqlException
+	 */
+	public function getId(): string
+	{
+		return $this->id;
+	}
+
+	/**
+	 * @param string $id
+	 * @return ArticleModel
+	 */
+	public function setId(string $id): ArticleModel
+	{
+		$this->id = $id;
+		return $this;
+	}
+
+	/**
+	 * @return null|string
+	 */
+	public function getCategoryName()
+	{
+		if (!$this->categoryName && $this->categoryId) {
+			try {
+				$category = CategoryModel::get($this->getCategoryId());
+				if (($category instanceof CategoryModel)) {
+					$this->categoryName = $category->getName();
+				} else {
+					$this->categoryName = null;
+				}
+			} catch (Throwable $e) {
+				$this->categoryName = null;
+			}
+		}
+		return $this->categoryName;
+	}
+
+	/**
+	 * @return string|null
+	 */
+	public function getCategoryId()
+	{
+		return $this->categoryId;
+	}
+
+	/**
+	 * @param string|null $categoryId
+	 * @return ArticleModel
+	 */
+	public function setCategoryId($categoryId): ArticleModel
+	{
+		$this->categoryId = $categoryId;
+		return $this;
+	}
+
+	/**
+	 * @return string
 	 */
 	public function getAuthorName(): string
 	{
-		$author = AccountModel::get($this->getAuthorId());
-		if (($author instanceof AccountModel)) {
-			$this->authorName = $author->getName();
-		} else {
-			$this->authorName = null;
+		if (!$this->authorName && $this->authorId) {
+			try {
+				$author = AccountModel::get($this->getAuthorId());
+				if (($author instanceof AccountModel)) {
+					$this->authorName = $author->getName();
+				} else {
+					$this->authorName = null;
+				}
+			} catch (Throwable $e) {
+				$this->authorName = null;
+			}
 		}
 		return $this->authorName;
 	}
 
 	/**
-	 * @return null|string
-	 * @throws ModelException
-	 * @throws SqlException
+	 * @return string
 	 */
-	public function getCategoryName()
+	public function getAuthorId(): string
 	{
-		if ($this->categoryName && !$this->categoryId) {
-			$category = CategoryModel::get($this->getCategoryId());
-			if (($category instanceof CategoryModel)) {
-				$this->categoryName = $category->getName();
-			}
-		}
-		return $this->categoryName;
+		return $this->authorId;
+	}
+
+	/**
+	 * @param string $authorId
+	 * @return ArticleModel
+	 */
+	public function setAuthorId(string $authorId): ArticleModel
+	{
+		$this->authorId = $authorId;
+		return $this;
 	}
 
 	/**

@@ -4,10 +4,16 @@
 namespace link\hefang\cms\user\models;
 
 
-use link\hefang\mvc\models\BaseLoginModel;
+use link\hefang\helpers\RandomHelper;
+use link\hefang\helpers\TimeHelper;
+use link\hefang\mvc\controllers\BaseController;
+use link\hefang\mvc\models\BaseModel2;
+use link\hefang\mvc\models\ModelField as MF;
+use link\hefang\mvc\Mvc;
 
-class AccountModel extends BaseLoginModel
+class AccountModel extends BaseModel2
 {
+	const ACCOUNT_SESSION_KEY = "ACCOUNT_SESSION";
 	private $id = "";
 	private $roleId = "";
 	private $name = "";
@@ -19,41 +25,55 @@ class AccountModel extends BaseLoginModel
 	private $lockedTime = null;
 	private $avatar = null;
 	private $enable = true;
+	private $loginTime = null;
+	private $loginIp = null;
+	private $token = null;
 
 	/**
-	 * @return string
+	 * 返回模型和数据库对应的字段
+	 * key 为数据库对应的字段名, value 为模型字段名
+	 * key 不写或为数字时将被框架忽略, 使用value值做为key
+	 * @return array
 	 */
-	public function getId(): string
+	public static function fields(): array
 	{
-		return $this->id;
+		return [
+			MF::prop("id")->primaryKey()->trim(),
+			MF::prop("roleId")->trim(),
+			MF::prop("name")->trim(),
+			MF::prop("avatar"),
+			MF::prop("password"),
+			MF::prop("registerTime"),
+			MF::prop("registerType"),
+			MF::prop("email")->trim(),
+			MF::prop("locked")->type(MF::TYPE_BOOL),
+			MF::prop("lockedTime"),
+			MF::prop("enable")->type(MF::TYPE_BOOL),
+		];
 	}
 
-	/**
-	 * @param string $id
-	 * @return AccountModel
-	 */
-	public function setId(string $id): AccountModel
+	public function login(BaseController $controller)
 	{
-		$this->id = $id;
-		return $this;
+		$authType = strtoupper(Mvc::getProperty("project.auth.type", "SESSION"));
+		$this->loginTime = TimeHelper::formatMillis();
+		$this->loginIp = $controller->_ip();
+		if ($authType === "TOKEN") {
+			$this->token = RandomHelper::guid();
+			Mvc::getCache()->set($this->token, $this);
+		} else {
+			$controller->_setSession(self::ACCOUNT_SESSION_KEY, $this);
+		}
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getRoleId(): string
+	public function logout(BaseController $controller)
 	{
-		return $this->roleId;
-	}
-
-	/**
-	 * @param string $roleId
-	 * @return AccountModel
-	 */
-	public function setRoleId(string $roleId): AccountModel
-	{
-		$this->roleId = $roleId;
-		return $this;
+		$authType = strtoupper(Mvc::getProperty("project.auth.type", "SESSION"));
+		if ($authType === "TOKEN") {
+			$this->token = RandomHelper::guid();
+			Mvc::getCache()->remove($this->token);
+		} else {
+			$controller->_setSession(self::ACCOUNT_SESSION_KEY, null);
+		}
 	}
 
 	/**
@@ -219,35 +239,65 @@ class AccountModel extends BaseLoginModel
 	}
 
 	/**
-	 * 返回主键
-	 * @return array
+	 * @return string|null
 	 */
-	public static function primaryKeyFields(): array
+	public function getRoleName()
 	{
-		return ["id"];
+		return $this->getRoleId();
 	}
 
 	/**
-	 * 返回模型和数据库对应的字段
-	 * key 为数据库对应的字段名, value 为模型字段名
-	 * key 不写或为数字时将被框架忽略, 使用value值做为key
-	 * @return array
+	 * @return string
 	 */
-	public static function fields(): array
+	public function getRoleId(): string
 	{
-		return [
-			"id",
-			"role_id" => "roleId",
-			"name",
-			"avatar",
-			"password",
-			"register_time" => "registerTime",
-			"register_type" => "registerType",
-			"email",
-			"locked",
-			"locked_time" => "lockedTime",
-			"enable",
-		];
+		return $this->roleId;
+	}
+
+	/**
+	 * @param string $roleId
+	 * @return AccountModel
+	 */
+	public function setRoleId(string $roleId): AccountModel
+	{
+		$this->roleId = $roleId;
+		return $this;
+	}
+
+	public function toMap(): array
+	{
+		$map = parent::toMap();
+		$map["token"] = $this->getToken();
+		$map["loginTime"] = $this->getLoginTime();
+		$map["loginIp"] = $this->getLoginIp();
+		$map["isAdmin"] = $this->isAdmin();
+		$map["isSuperAdmin"] = $this->isSuperAdmin();
+
+		return $map;
+	}
+
+	/**
+	 * @return null|string
+	 */
+	public function getToken()
+	{
+		return $this->token;
+	}
+
+	/**
+	 * @return null|string
+	 */
+	public function getLoginTime()
+	{
+		return $this->loginTime;
+	}
+
+	/**
+	 * @return null|string
+	 */
+	public function getLoginIp()
+	{
+		return $this->loginIp;
 	}
 
 	public function isAdmin(): bool
@@ -261,10 +311,20 @@ class AccountModel extends BaseLoginModel
 	}
 
 	/**
-	 * @return string|null
+	 * @return string
 	 */
-	public function getRoleName()
+	public function getId(): string
 	{
-		return $this->getRoleId();
+		return $this->id;
+	}
+
+	/**
+	 * @param string $id
+	 * @return AccountModel
+	 */
+	public function setId(string $id): AccountModel
+	{
+		$this->id = $id;
+		return $this;
 	}
 }

@@ -5,50 +5,23 @@ namespace link\hefang\cms\admin\controllers;
 
 
 use link\hefang\cms\admin\models\SettingCategoryModel;
+use link\hefang\cms\common\controllers\BaseCmsController;
 use link\hefang\cms\HeFangCMS;
-use link\hefang\mvc\controllers\BaseController;
 use link\hefang\mvc\exceptions\ModelException;
 use link\hefang\mvc\exceptions\SqlException;
-use link\hefang\mvc\interfaces\IDULG;
 use link\hefang\mvc\views\BaseView;
 
-class SettingCategoryController extends BaseController implements IDULG
+class SettingCategoryController extends BaseCmsController
 {
 
 	/**
-	 * 添加数据
-	 * @return BaseView
-	 */
-	public function insert(): BaseView
-	{
-		// TODO: Implement insert() method.
-	}
-
-	/**
-	 * 删除数据
-	 * @return BaseView
-	 */
-	public function delete(): BaseView
-	{
-		// TODO: Implement delete() method.
-	}
-
-	/**
-	 * 更新数据
-	 * @return BaseView
-	 */
-	public function update(): BaseView
-	{
-		// TODO: Implement update() method.
-	}
-
-	/**
 	 * 查询数据列表
+	 * @param string|null $cmd
 	 * @return BaseView
 	 */
-	public function list(): BaseView
+	public function list(string $cmd = null): BaseView
 	{
-		$search = $this->_request(HeFangCMS::searchKey());
+		$search = $this->_request(HeFangCMS::queryKey());
 		try {
 			$pager = SettingCategoryModel::pager($this->_pageIndex(), $this->_pageSize(), $search);
 			return $this->_restApiOk($pager);

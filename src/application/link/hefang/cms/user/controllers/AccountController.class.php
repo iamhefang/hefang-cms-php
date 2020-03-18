@@ -5,17 +5,17 @@ namespace link\hefang\cms\user\controllers;
 
 
 use link\hefang\cms\admin\models\MenuModel;
+use link\hefang\cms\common\controllers\BaseCmsController;
 use link\hefang\cms\user\models\AccountModel;
 use link\hefang\helpers\HashHelper;
+use link\hefang\helpers\StringHelper;
 use link\hefang\helpers\TimeHelper;
-use link\hefang\mvc\controllers\BaseController;
 use link\hefang\mvc\exceptions\ModelException;
 use link\hefang\mvc\exceptions\SqlException;
-use link\hefang\mvc\models\BaseLoginModel;
 use link\hefang\mvc\Mvc;
 use link\hefang\mvc\views\BaseView;
 
-class AccountController extends BaseController
+class AccountController extends BaseCmsController
 {
 
 	public function initRoot(): BaseView
@@ -39,6 +39,12 @@ class AccountController extends BaseController
 		$name = $this->_post("name");
 		$password = $this->_post("password");
 		$captcha = $this->_post("captcha");
+		if (StringHelper::isNullOrBlank($name)) {
+			return $this->_restApiBadRequest("用户名不能为空");
+		}
+		if (strlen($password) !== 72) {
+			return $this->_restApiBadRequest("参数异常");
+		}
 		try {
 			$user = AccountModel::find("name='{$name}'");
 			if (!($user instanceof AccountModel) || !$user->isExist()) {
@@ -61,7 +67,7 @@ class AccountController extends BaseController
 
 	public function logout(): BaseView
 	{
-		$login = $this->_getLogin();
+		$login = $this->_checkLogin();
 		if ($login instanceof AccountModel) {
 			$login->logout($this);
 		}
@@ -74,8 +80,7 @@ class AccountController extends BaseController
 	 */
 	public function current(): BaseView
 	{
-		$login = $this->_getLogin();
-		return $login instanceof BaseLoginModel ? $this->_restApiOk($login) : $this->_restApiUnauthorized();
+		return $this->_restApiOk($this->_checkLogin());
 	}
 
 	/**
@@ -84,7 +89,7 @@ class AccountController extends BaseController
 	 */
 	public function menus(): BaseView
 	{
-		$login = $this->_getLogin();
-		return $this->_restApiOk(MenuModel::all());
+		$this->_checkLogin();
+		return $this->_restApiOk(MenuModel::all(true));
 	}
 }

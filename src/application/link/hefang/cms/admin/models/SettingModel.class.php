@@ -7,10 +7,11 @@ namespace link\hefang\cms\admin\models;
 use link\hefang\cms\common\helpers\CacheHelper;
 use link\hefang\helpers\ParseHelper;
 use link\hefang\mvc\exceptions\SqlException;
-use link\hefang\mvc\models\BaseModel;
+use link\hefang\mvc\models\BaseModel2;
+use link\hefang\mvc\models\ModelField as MF;
 use link\hefang\mvc\Mvc;
 
-class SettingModel extends BaseModel
+class SettingModel extends BaseModel2
 {
 	const CACHE_KEY_ALL_SETTINGS = "all-settings";
 
@@ -24,26 +25,41 @@ class SettingModel extends BaseModel
 	private $nullable = true;
 	private $showInCenter = true;
 	private $sort = 0;
-
-	/**
-	 * @return int
-	 */
-	public function getSort(): int
-	{
-		return $this->sort;
-	}
-
-	/**
-	 * @param int $sort
-	 * @return SettingModel
-	 */
-	public function setSort(int $sort): SettingModel
-	{
-		$this->sort = $sort;
-		return $this;
-	}
-
 	private $enable = true;
+
+	/**
+	 * @param bool $useCache
+	 * @return array
+	 */
+	public static function allValues(bool $useCache = true): array
+	{
+		try {
+			$models = self::allModels($useCache);
+
+			$values = [];
+			foreach ($models as $model) {
+				if (!($model instanceof SettingModel)) continue;
+				$values[$model->getCategory() . "|" . $model->getKey()] = $model->getValue();
+			}
+			return $values;
+		} catch (SqlException $e) {
+			Mvc::getLogger()->error($e->getMessage(), "获取全部配置时出现异常", $e);
+			return [];
+		}
+	}
+
+	/**
+	 * @param bool $useCache
+	 * @return array
+	 */
+	public static function allModels(bool $useCache = true): array
+	{
+		return CacheHelper::cacheOrFetch(self::CACHE_KEY_ALL_SETTINGS, function () {
+			$data = SettingModel::pager(1, 1000, "enable = TRUE")->getData();
+			Mvc::getCache()->set(self::CACHE_KEY_ALL_SETTINGS, $data);
+			return $data;
+		}, -1, $useCache);
+	}
 
 	/**
 	 * @return string
@@ -78,24 +94,6 @@ class SettingModel extends BaseModel
 	public function setKey(string $key): SettingModel
 	{
 		$this->key = $key;
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getName(): string
-	{
-		return $this->name;
-	}
-
-	/**
-	 * @param string $name
-	 * @return SettingModel
-	 */
-	public function setName(string $name): SettingModel
-	{
-		$this->name = $name;
 		return $this;
 	}
 
@@ -141,6 +139,64 @@ class SettingModel extends BaseModel
 	public function setType(string $type): SettingModel
 	{
 		$this->type = $type;
+		return $this;
+	}
+
+	/**
+	 * 返回模型和数据库对应的字段
+	 * key 为数据库对应的字段名, value 为模型字段名
+	 * key 不写或为数字时将被框架忽略, 使用value值做为key
+	 * @return array
+	 */
+	public static function fields(): array
+	{
+		return [
+			MF::prop("category")->primaryKey()->trim(),
+			MF::prop("key")->primaryKey()->trim(),
+			MF::prop("name")->trim(),
+			MF::prop("value")->trim(),
+			MF::prop("type")->trim(),
+			MF::prop("description")->trim(),
+			MF::prop("attribute")->trim(),
+			MF::prop("nullable")->type(MF::TYPE_BOOL),
+			MF::prop("showInCenter")->type(MF::TYPE_BOOL),
+			MF::prop("enable")->type(MF::TYPE_BOOL),
+		];
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getSort(): int
+	{
+		return $this->sort;
+	}
+
+	/**
+	 * @param int $sort
+	 * @return SettingModel
+	 */
+	public function setSort(int $sort): SettingModel
+	{
+		$this->sort = $sort;
+		return $this;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getName(): string
+	{
+		return $this->name;
+	}
+
+	/**
+	 * @param string $name
+	 * @return SettingModel
+	 */
+	public function setName(string $name): SettingModel
+	{
+		$this->name = $name;
 		return $this;
 	}
 
@@ -214,72 +270,6 @@ class SettingModel extends BaseModel
 	{
 		$this->enable = $enable;
 		return $this;
-	}
-
-	/**
-	 * @param bool $useCache
-	 * @return array
-	 */
-	public static function allModels(bool $useCache = true): array
-	{
-		return CacheHelper::cacheOrFetch(self::CACHE_KEY_ALL_SETTINGS, function () {
-			$data = SettingModel::pager(1, 1000, null, "enable = TRUE")->getData();
-			Mvc::getCache()->set(self::CACHE_KEY_ALL_SETTINGS, $data);
-			return $data;
-		}, -1, $useCache);
-	}
-
-	/**
-	 * @param bool $useCache
-	 * @return array
-	 */
-	public static function allValues(bool $useCache = true): array
-	{
-		try {
-			$models = self::allModels($useCache);
-
-			$values = [];
-			foreach ($models as $model) {
-				if (!($model instanceof SettingModel)) continue;
-				$values[$model->getCategory() . "|" . $model->getKey()] = $model->getValue();
-			}
-			return $values;
-		} catch (SqlException $e) {
-			Mvc::getLogger()->error($e->getMessage(), "获取全部配置时出现异常", $e);
-			return [];
-		}
-	}
-
-	/**
-	 * 返回主键
-	 * @return array
-	 */
-	public static function primaryKeyFields(): array
-	{
-		return ["category", "key"];
-	}
-
-
-	/**
-	 * 返回模型和数据库对应的字段
-	 * key 为数据库对应的字段名, value 为模型字段名
-	 * key 不写或为数字时将被框架忽略, 使用value值做为key
-	 * @return array
-	 */
-	public static function fields(): array
-	{
-		return [
-			"category",
-			"key",
-			"name",
-			"value",
-			"type",
-			"description",
-			"attribute",
-			"nullable",
-			"show_in_center" => "showInCenter",
-			"enable",
-		];
 	}
 
 	/**

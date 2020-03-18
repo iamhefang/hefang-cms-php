@@ -7,10 +7,10 @@ namespace link\hefang\cms\user\models;
 use link\hefang\cms\admin\models\MenuModel;
 use link\hefang\mvc\databases\Sql;
 use link\hefang\mvc\exceptions\SqlException;
-use link\hefang\mvc\models\BaseModel;
+use link\hefang\mvc\models\BaseModel2;
 use link\hefang\mvc\Mvc;
 
-class RoleModel extends BaseModel
+class RoleModel extends BaseModel2
 {
 	private $id = "";
 	private $parentId = null;
@@ -18,6 +18,32 @@ class RoleModel extends BaseModel
 	private $description = null;
 	private $enable = false;
 	private $menus = [];
+
+	/**
+	 * 返回主键
+	 * @return array
+	 */
+	public static function primaryKeyFields(): array
+	{
+		return ["id"];
+	}
+
+	/**
+	 * 返回模型和数据库对应的字段
+	 * key 为数据库对应的字段名, value 为模型字段名
+	 * key 不写或为数字时将被框架忽略, 使用value值做为key
+	 * @return array
+	 */
+	public static function fields(): array
+	{
+		return [
+			"id",
+			"parent_id" => "parentId",
+			"name",
+			"description",
+			"enable",
+		];
+	}
 
 	/**
 	 * @return array
@@ -142,31 +168,5 @@ class RoleModel extends BaseModel
 	{
 		$this->enable = $enable;
 		return $this;
-	}
-
-	/**
-	 * 返回主键
-	 * @return array
-	 */
-	public static function primaryKeyFields(): array
-	{
-		return ["id"];
-	}
-
-	/**
-	 * 返回模型和数据库对应的字段
-	 * key 为数据库对应的字段名, value 为模型字段名
-	 * key 不写或为数字时将被框架忽略, 使用value值做为key
-	 * @return array
-	 */
-	public static function fields(): array
-	{
-		return [
-			"id",
-			"parent_id" => "parentId",
-			"name",
-			"description",
-			"enable",
-		];
 	}
 }

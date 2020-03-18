@@ -4,11 +4,11 @@
 namespace link\hefang\cms\admin\controllers;
 
 
-use link\hefang\mvc\controllers\BaseController;
+use link\hefang\cms\common\controllers\BaseCmsController;
 use link\hefang\mvc\Mvc;
 use link\hefang\mvc\views\BaseView;
 
-class CacheController extends BaseController
+class CacheController extends BaseCmsController
 {
 	public function clean(): BaseView
 	{

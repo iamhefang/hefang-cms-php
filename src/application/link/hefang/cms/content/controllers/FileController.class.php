@@ -5,22 +5,20 @@ namespace link\hefang\cms\content\controllers;
 
 
 use Exception;
-use link\hefang\cms\common\helpers\AccountHelper;
+use link\hefang\cms\common\controllers\BaseCmsController;
+use link\hefang\cms\content\models\ContentTagModel;
 use link\hefang\cms\content\models\FileModel;
-use link\hefang\cms\content\models\TagModel;
 use link\hefang\cms\HeFangCMS;
 use link\hefang\cms\user\models\AccountModel;
 use link\hefang\guid\GUKey;
 use link\hefang\helpers\CollectionHelper;
 use link\hefang\helpers\ParseHelper;
 use link\hefang\helpers\StringHelper;
-use link\hefang\mvc\controllers\BaseController;
 use link\hefang\mvc\databases\Sql;
 use link\hefang\mvc\exceptions\SqlException;
-use link\hefang\mvc\interfaces\IDULG;
 use link\hefang\mvc\views\BaseView;
 
-class FileController extends BaseController implements IDULG
+class FileController extends BaseCmsController
 {
 	const ERROR_MAP = [
 		UPLOAD_ERR_INI_SIZE => "上传文件过大: 超过PHP限制",
@@ -33,9 +31,10 @@ class FileController extends BaseController implements IDULG
 
 	/**
 	 * 文件上传， 一次上传一个文件
+	 * @param string|null $id
 	 * @return BaseView
 	 */
-	public function insert(): BaseView
+	public function set(string $id = null): BaseView
 	{
 		$name = $this->_post("name");
 		$tags = $this->_post("tags");
@@ -72,7 +71,7 @@ class FileController extends BaseController implements IDULG
 			->setHash("sha1." . $hash)
 			->setEnable(true);
 		try {
-			$tagTable = TagModel::table();
+			$tagTable = ContentTagModel::table();
 			if (is_array($tags) && count($tags) > 0) {
 				$sqls = [];
 				foreach ($tags as $tag) {
@@ -84,7 +83,7 @@ class FileController extends BaseController implements IDULG
 						]
 					);
 				}
-				TagModel::database()->transaction($sqls);
+				ContentTagModel::database()->transaction($sqls);
 			}
 			return $model->insert() ? $this->_restApiOk($model) : $this->_restFailedUnknownReason();
 		} catch (Exception $e) {
@@ -94,11 +93,12 @@ class FileController extends BaseController implements IDULG
 
 	/**
 	 * 删除数据
+	 * @param string|null $id
 	 * @return BaseView
 	 */
-	public function delete(): BaseView
+	public function delete(string $id = null): BaseView
 	{
-		$user = AccountHelper::checkLogin($this);
+		$user = $this->_checkLogin();
 		$ids = $this->_request("ids");
 		if (!is_array($ids)) {
 			return $this->_restApiBadRequest();
@@ -118,23 +118,15 @@ class FileController extends BaseController implements IDULG
 		}
 	}
 
-	/**
-	 * 更新数据
-	 * @return BaseView
-	 */
-	public function update(): BaseView
-	{
-
-		// TODO: Implement update() method.
-	}
 
 	/**
 	 * 查询数据列表
+	 * @param string|null $cmd
 	 * @return BaseView
 	 */
-	public function list(): BaseView
+	public function list(string $cmd = null): BaseView
 	{
-		$search = $this->_request(HeFangCMS::searchKey());
+		$search = $this->_request(HeFangCMS::queryKey());
 		$tag = $this->_request("tag");
 		$type = $this->_request("type");
 		$user = $this->_getLogin();
@@ -149,7 +141,7 @@ class FileController extends BaseController implements IDULG
 		}
 
 		if (!StringHelper::isNullOrBlank($tag)) {
-			$tagTable = TagModel::table();
+			$tagTable = ContentTagModel::table();
 			$where .= " AND id IN (SELECT content_id FROM `{$tagTable}` WHERE `tag`='{$tag}' AND `type` = 'file')";
 		}
 
@@ -164,9 +156,8 @@ class FileController extends BaseController implements IDULG
 			return $this->_restApiOk(FileModel::pager(
 				$this->_pageIndex(),
 				$this->_pageSize(),
-				$search,
 				$where,
-				[$this->_sort()]
+				FileModel::sort2sql($this->_sort())
 			));
 		} catch (SqlException $e) {
 			return $this->_restApiServerError($e);

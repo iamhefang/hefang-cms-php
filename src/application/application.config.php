@@ -27,7 +27,10 @@ return [
 	'project.package' => "link.hefang.cms",
 	'project.application.class' => 'link.hefang.cms.HeFangCMS',
 	//项目搜索字段名
-	'project.search.field.name' => 'search',
+	'project.query.field.name' => 'query',
+	//排序字段名
+	'project.sort.field.name' => 'sort',
+	'project.auth.type' => 'SESSION', //TOKEN, SESSION
 	'database.enable' => true,
 	'database.class' => 'link.hefang.mvc.databases.Mysql',
 	'database.host' => 'hefang.link',

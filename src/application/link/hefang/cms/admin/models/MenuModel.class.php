@@ -7,9 +7,11 @@ namespace link\hefang\cms\admin\models;
 use link\hefang\cms\common\helpers\CacheHelper;
 use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\databases\SqlSort;
-use link\hefang\mvc\models\BaseModel;
+use link\hefang\mvc\models\BaseModel2;
+use link\hefang\mvc\models\ModelField as MF;
 
-class MenuModel extends BaseModel
+
+class MenuModel extends BaseModel2
 {
 	const CACHE_KEY_ALL_MENUS = "all-menus";
 
@@ -23,21 +25,48 @@ class MenuModel extends BaseModel
 	private $children = [];
 
 	/**
-	 * @return string
+	 * @return array
 	 */
-	public function getId(): string
+	public static function fields(): array
 	{
-		return $this->id;
+		return [
+			MF::prop("id")->primaryKey()->trim(),
+			MF::prop("parentId")->trim(),
+			MF::prop("name")->trim(),
+			MF::prop("path")->trim(),
+			MF::prop("icon")->trim(),
+			MF::prop("sort")->type(MF::TYPE_INT),
+			MF::prop("enable")->type(MF::TYPE_BOOL),
+		];
 	}
 
 	/**
-	 * @param string $id
-	 * @return MenuModel
+	 * @param bool $useCache
+	 * @param bool $onlyEnable
+	 * @return array
 	 */
-	public function setId(string $id): MenuModel
+	public static function all(bool $onlyEnable = false, bool $useCache = true): array
 	{
-		$this->id = $id;
-		return $this;
+		return CacheHelper::cacheOrFetch(self::CACHE_KEY_ALL_MENUS, function () use ($onlyEnable) {
+			$functions = [];
+			$pager = MenuModel::pager(
+				1, 1000,
+				$onlyEnable ? "enable = TRUE" : null,
+				[new SqlSort("sort", SqlSort::TYPE_ASC)]);
+			foreach ($pager->getData() as $item) {
+				if (!($item instanceof MenuModel)) continue;
+				if (StringHelper::isNullOrBlank($item->getParentId())) {
+					if (array_key_exists($item->getId(), $functions)) {
+						$item->children = $functions[$item->getId()]->children;
+					}
+					$functions[$item->getId()] = $item;
+				} else {
+					$functions[$item->getParentId()]->children[] = $item;
+				}
+			}
+			$all = array_values($functions);
+			return $all;
+		}, -1, $useCache);
 	}
 
 	/**
@@ -55,6 +84,24 @@ class MenuModel extends BaseModel
 	public function setParentId($parentId): MenuModel
 	{
 		$this->parentId = $parentId;
+		return $this;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getId(): string
+	{
+		return $this->id;
+	}
+
+	/**
+	 * @param string $id
+	 * @return MenuModel
+	 */
+	public function setId(string $id): MenuModel
+	{
+		$this->id = $id;
 		return $this;
 	}
 
@@ -130,6 +177,16 @@ class MenuModel extends BaseModel
 		return $this;
 	}
 
+	public function toMap(): array
+	{
+		$map = parent::toMap();
+		if (!empty($this->children)) {
+			$map["children"] = $this->children;
+		}
+		$map["enable"] = $this->isEnable();
+		return $map;
+	}
+
 	/**
 	 * @return bool
 	 */
@@ -146,68 +203,5 @@ class MenuModel extends BaseModel
 	{
 		$this->enable = $enable;
 		return $this;
-	}
-
-	public function toMap(): array
-	{
-		$map = parent::toMap();
-		if (!empty($this->children)) {
-			$map["children"] = $this->children;
-		}
-		$map["enable"] = $this->isEnable();
-		return $map;
-	}
-
-	/**
-	 * 返回主键
-	 * @return array
-	 */
-	public static function primaryKeyFields(): array
-	{
-		return ["id"];
-	}
-
-	/**
-	 * 返回模型和数据库对应的字段
-	 * key 为数据库对应的字段名, value 为模型字段名
-	 * key 不写或为数字时将被框架忽略, 使用value值做为key
-	 * @return array
-	 */
-	public static function fields(): array
-	{
-		return [
-			"id",
-			"parent_id" => "parentId",
-			"name",
-			"path",
-			"icon",
-			"sort",
-			"enable",
-		];
-	}
-
-	/**
-	 * @param bool $useCache
-	 * @return array
-	 */
-	public static function all(bool $useCache = true): array
-	{
-		return CacheHelper::cacheOrFetch(self::CACHE_KEY_ALL_MENUS, function () {
-			$functions = [];
-			$pager = MenuModel::pager(1, 1000, null, "enable = TRUE", [new SqlSort("sort")]);
-			foreach ($pager->getData() as $item) {
-				if (!($item instanceof MenuModel)) continue;
-				if (StringHelper::isNullOrBlank($item->getParentId())) {
-					if (array_key_exists($item->getId(), $functions)) {
-						$item->children = $functions[$item->getId()]->children;
-					}
-					$functions[$item->getId()] = $item;
-				} else {
-					$functions[$item->getParentId()]->children[] = $item;
-				}
-			}
-			$all = array_values($functions);
-			return $all;
-		}, -1, $useCache);
 	}
 }

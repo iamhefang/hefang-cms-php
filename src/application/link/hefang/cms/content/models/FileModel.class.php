@@ -4,10 +4,12 @@
 namespace link\hefang\cms\content\models;
 
 
+use link\hefang\mvc\databases\Sql;
 use link\hefang\mvc\exceptions\SqlException;
-use link\hefang\mvc\models\BaseModel;
+use link\hefang\mvc\models\BaseModel2;
+use link\hefang\mvc\models\ModelField as MF;
 
-class FileModel extends BaseModel
+class FileModel extends BaseModel2
 {
 	private $id = "";
 	private $name;
@@ -21,6 +23,28 @@ class FileModel extends BaseModel
 	private $savePath = "";
 	private $hash = "";
 	private $tags = [];
+
+	/**
+	 * 返回模型和数据库对应的字段
+	 * key 为数据库对应的字段名, value 为模型字段名
+	 * key 不写或为数字时将被框架忽略, 使用value值做为key
+	 * @return array
+	 */
+	public static function fields(): array
+	{
+		return [
+			MF::prop("id")->primaryKey()->trim(),
+			MF::prop("name")->trim(),
+			MF::prop("fileName")->trim(),
+			MF::prop("size")->type(MF::TYPE_INT),
+			MF::prop("uploadTime"),
+			MF::prop("uploaderId"),
+			MF::prop("isPublic")->type(MF::TYPE_BOOL),
+			MF::prop("enable")->type(MF::TYPE_BOOL),
+			MF::prop("savePath")->trim(),
+			MF::prop("hash")->trim()
+		];
+	}
 
 	/**
 	 * @return string
@@ -41,27 +65,6 @@ class FileModel extends BaseModel
 	}
 
 	/**
-	 * @return array
-	 * @throws SqlException
-	 */
-	public function getTags(): array
-	{
-		if (empty($this->tags)) {
-			$data = TagModel::pager(
-				1,
-				1000,
-				null,
-				"content_id = '{$this->getId()}'"
-			)->getData();
-			$this->tags = array_map(function (TagModel $item) {
-				return $item->getTag();
-			}, $data);
-		}
-		return $this->tags;
-	}
-
-
-	/**
 	 * @return string|null
 	 */
 	public function getType()
@@ -76,24 +79,6 @@ class FileModel extends BaseModel
 	public function setType($type)
 	{
 		$this->type = $type;
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getId(): string
-	{
-		return $this->id;
-	}
-
-	/**
-	 * @param string $id
-	 * @return FileModel
-	 */
-	public function setId(string $id)
-	{
-		$this->id = $id;
 		return $this;
 	}
 
@@ -231,34 +216,40 @@ class FileModel extends BaseModel
 	}
 
 	/**
-	 * 返回主键
 	 * @return array
+	 * @throws SqlException
 	 */
-	public static function primaryKeyFields(): array
+	public function getTags(): array
 	{
-		return ["id"];
+		if (empty($this->tags)) {
+			$data = ContentTagModel::pager(
+				1,
+				1000,
+				new Sql("content_id = :contentId", ["contentId" => $this->getId()])
+			)->getData();
+			$this->tags = array_map(function (ContentTagModel $item) {
+				return $item->getTag();
+			}, $data);
+		}
+		return $this->tags;
 	}
 
 	/**
-	 * 返回模型和数据库对应的字段
-	 * key 为数据库对应的字段名, value 为模型字段名
-	 * key 不写或为数字时将被框架忽略, 使用value值做为key
-	 * @return array
+	 * @return string
 	 */
-	public static function fields(): array
+	public function getId(): string
 	{
-		return [
-			"id",
-			"name",
-			"file_name" => "fileName",
-			"size",
-			"upload_time" => "uploadTime",
-			"uploader_id" => "uploaderId",
-			"is_public" => "isPublic",
-			"enable",
-			"save_path" => "savePath",
-			"hash"
-		];
+		return $this->id;
+	}
+
+	/**
+	 * @param string $id
+	 * @return FileModel
+	 */
+	public function setId(string $id)
+	{
+		$this->id = $id;
+		return $this;
 	}
 
 	/**

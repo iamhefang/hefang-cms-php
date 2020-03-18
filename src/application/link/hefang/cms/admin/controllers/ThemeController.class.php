@@ -4,14 +4,14 @@
 namespace link\hefang\cms\admin\controllers;
 
 
+use link\hefang\cms\common\controllers\BaseCmsController;
 use link\hefang\cms\common\helpers\CacheHelper;
-use link\hefang\mvc\controllers\BaseController;
 use link\hefang\mvc\Mvc;
 use link\hefang\mvc\views\BaseView;
 
-class ThemeController extends BaseController
+class ThemeController extends BaseCmsController
 {
-	public function list(): BaseView
+	public function list(string $cmd = null): BaseView
 	{
 		$themes = CacheHelper::cacheOrFetch("themes", function () {
 			$themeDirs = scandir(PATH_THEMES);

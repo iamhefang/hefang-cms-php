@@ -5,16 +5,16 @@ namespace link\hefang\cms\content\controllers;
 
 
 use Exception;
+use link\hefang\cms\common\controllers\BaseCmsController;
 use link\hefang\cms\content\models\CategoryModel;
 use link\hefang\cms\user\models\AccountModel;
 use link\hefang\helpers\StringHelper;
-use link\hefang\mvc\controllers\BaseController;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\views\BaseView;
 
-class CategoryController extends BaseController
+class CategoryController extends BaseCmsController
 {
-	public function insert(): BaseView
+	public function set(string $id = null): BaseView
 	{
 		$user = $this->_getLogin();
 		if (!($user instanceof AccountModel)) return $this->_restApiUnauthorized();
@@ -54,7 +54,7 @@ class CategoryController extends BaseController
 		}
 	}
 
-	public function list(): BaseView
+	public function list(string $cmd = null): BaseView
 	{
 		$type = $this->_request("type");
 		$where = "enable = TRUE";
@@ -65,7 +65,6 @@ class CategoryController extends BaseController
 			return $this->_restApiOk(CategoryModel::pager(
 				$this->_pageIndex(),
 				$this->_pageSize(),
-				null,
 				$where
 			));
 		} catch (SqlException $e) {

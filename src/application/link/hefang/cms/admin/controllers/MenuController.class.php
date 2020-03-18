@@ -6,54 +6,70 @@ namespace link\hefang\cms\admin\controllers;
 
 use Exception;
 use link\hefang\cms\admin\models\MenuModel;
+use link\hefang\cms\common\controllers\BaseCmsController;
 use link\hefang\cms\user\models\AccountModel;
 use link\hefang\cms\user\models\RoleModel;
 use link\hefang\guid\GUKey;
 use link\hefang\helpers\CollectionHelper;
 use link\hefang\helpers\StringHelper;
-use link\hefang\mvc\controllers\BaseController;
 use link\hefang\mvc\databases\Sql;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\Mvc;
 use link\hefang\mvc\views\BaseView;
+use Throwable;
 
-class MenuController extends BaseController
+class MenuController extends BaseCmsController
 {
-	public function list(): BaseView
+	public function list(string $cmd = null): BaseView
 	{
+//		$this->_checkLogin();
 		try {
-			$pager = MenuModel::pager($this->_pageIndex(), $this->_pageSize(), null, "enable = TRUE", [$this->_sort()]);
+			$pager = MenuModel::pager(
+				$this->_pageIndex(),
+				$this->_pageSize(),
+				"enable = TRUE",
+				MenuModel::sort2sql($this->_sort())
+			);
 			return $this->_restApiOk($pager);
 		} catch (SqlException $e) {
 			return $this->_restApiServerError($e);
 		}
 	}
 
-	public function delete(): BaseView
+	/**
+	 * 删除一条数据
+	 * @method DELETE
+	 * @method POST
+	 * @param string|null $cmd
+	 * @return BaseView
+	 */
+	public function delete(string $cmd = null): BaseView
 	{
-		$login = $this->_getLogin();
-		if (!($login instanceof AccountModel)) {
-			return $this->_restApiUnauthorized();
+		$ids = $this->_post("ids");
+		if (!is_array($ids) || !in_array($cmd, ["recycle", "destroy", "restore"])) {
+			return $this->_restApiBadRequest();
 		}
-		if (!$login->isAdmin()) {
-			return $this->_restApiForbidden("该功能只有管理员才能使用");
+		if (
+			($cmd === "restore" && $this->_method() !== "POST") ||
+			($cmd !== "restore" && $this->_method() === "POST")
+		) {
+			return $this->_restApiMethodNotAllowed();
 		}
-		$id = $this->_request("id");
-		if (!GUKey::isGuKey($id)) return $this->_restApiBadRequest();
-
 		try {
-			$model = MenuModel::get($id);
-			if (!($model instanceof MenuModel) || !$model->isExist()) {
-				return $this->_restApiNotFound("要修改的菜单不存在或已被物理删除");
+			$where = "`id` IN ('" . join("','", $ids) . "')";
+			if ($cmd === "destroy") {
+				$res = MenuModel::database()->delete(MenuModel::table(), $where);
+			} else {
+				$data = ["enable" => $cmd === "restore"];
+				$res = MenuModel::database()->update(MenuModel::table(), $data, $where);
 			}
-			$res = $model->setEnable(false)->update(["enable"]);
-			return $res ? $this->_restApiOk() : $this->_restNotModified();
-		} catch (Exception $e) {
+			return $this->_restApiOk($res);
+		} catch (Throwable $e) {
 			return $this->_restApiServerError($e);
 		}
 	}
 
-	public function set(): BaseView
+	public function set(string $id = null): BaseView
 	{
 		$login = $this->_getLogin();
 		if (!($login instanceof AccountModel)) {
@@ -94,6 +110,7 @@ class MenuController extends BaseController
 
 	public function all(): BaseView
 	{
+		$this->_checkLogin();
 		try {
 			return $this->_restApiOk(MenuModel::all());
 		} catch (SqlException $e) {

@@ -3,14 +3,15 @@
 namespace link\hefang\cms\main\controllers;
 
 use Exception;
+use link\hefang\cms\common\controllers\BaseCmsController;
 use link\hefang\cms\common\helpers\CacheHelper;
 use link\hefang\cms\content\models\ArticleModel;
 use link\hefang\helpers\CollectionHelper;
-use link\hefang\mvc\controllers\BaseController;
+use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\Mvc;
 use link\hefang\mvc\views\BaseView;
 
-class HomeController extends BaseController
+class HomeController extends BaseCmsController
 {
 	/**
 	 * 首页
@@ -21,6 +22,19 @@ class HomeController extends BaseController
 		return $this->_template($this->makeTplData([
 			"title" => "首页"
 		]), "index");
+	}
+
+	private function makeTplData(array $data): array
+	{
+		$name = Mvc::getConfig("site|name");
+		$title = CollectionHelper::getOrDefault($data, "title", "无标题");
+		return array_merge([
+			"keywords" => Mvc::getConfig("site|keywords"),
+			"description" => Mvc::getConfig("site|description"),
+			"author" => "",
+		], $data, [
+			"title" => "{$title} - {$name}",
+		]);
 	}
 
 	/**
@@ -63,16 +77,11 @@ class HomeController extends BaseController
 		]), "error");
 	}
 
-	private function makeTplData(array $data): array
+	public function search(): BaseView
 	{
-		$name = Mvc::getConfig("site|name");
-		$title = CollectionHelper::getOrDefault($data, "title", "无标题");
-		return array_merge([
-			"keywords" => Mvc::getConfig("site|keywords"),
-			"description" => Mvc::getConfig("site|description"),
-			"author" => "",
-		], $data, [
-			"title" => "{$title} - {$name}",
-		]);
+		$keywords = $this->_request("search");
+		if (StringHelper::isNullOrBlank($keywords)) {
+			return $this->_errorView("请输入搜索关键字");
+		}
 	}
 }
