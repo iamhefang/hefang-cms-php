@@ -7,7 +7,6 @@ namespace link\hefang\cms\admin\controllers;
 use Exception;
 use link\hefang\cms\admin\models\SettingModel;
 use link\hefang\cms\common\controllers\BaseCmsController;
-use link\hefang\cms\HeFangCMS;
 use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\views\BaseView;
@@ -24,8 +23,8 @@ class SettingController extends BaseCmsController
 	public function list(string $cmd = null): BaseView
 	{
 		$category = $this->_request("category");
-		$search = $this->_request(HeFangCMS::queryKey());
-		$where = "enable = TRUE AND show_in_center = FALSE";
+//		$search = $this->_request(HeFangCMS::queryKey());
+		$where = "enable = TRUE AND show_in_center = TRUE";
 		if (!StringHelper::isNullOrBlank($category)) {
 			$where .= "category = '{$category}'";
 		}

@@ -8,12 +8,19 @@ use link\hefang\cms\HeFangCMS;
 use link\hefang\cms\user\models\AccountModel;
 use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\controllers\BaseController;
+use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\interfaces\SGLD;
 use link\hefang\mvc\Mvc;
 use link\hefang\mvc\views\BaseView;
+use Throwable;
 
 abstract class BaseCmsController extends BaseController implements SGLD
 {
+	protected function modelClass(): string
+	{
+		return "";
+	}
+
 	/**
 	 * 获取查询条件
 	 * @return string
@@ -24,11 +31,12 @@ abstract class BaseCmsController extends BaseController implements SGLD
 	}
 
 	/**
+	 * @param string $defaultSort
 	 * @return string
 	 */
-	public function _sort(): string
+	public function _sort(string $defaultSort = ""): string
 	{
-		return $this->_request(HeFangCMS::sortKey(), "");
+		return $this->_request(HeFangCMS::sortKey(), $defaultSort);
 	}
 
 	public function _pageIndex(int $pageIndex = 1): int
@@ -117,11 +125,38 @@ abstract class BaseCmsController extends BaseController implements SGLD
 	/**
 	 * 删除一条数据
 	 * @method DELETE
-	 * @param string|null $id
+	 * @method POST
+	 * @param string|null $cmd
 	 * @return BaseView
+	 * @throws SqlException
 	 */
-	public function delete(string $id = null): BaseView
+	public function delete(string $cmd = null): BaseView
 	{
-		return $this->_restApiNotImplemented();
+		$class = $this->modelClass();
+		if (!class_exists($class)) {
+			return $this->_restApiNotImplemented();
+		}
+		$ids = $this->_post("ids");
+		if (!is_array($ids) || !in_array($cmd, ["recycle", "destroy", "restore"])) {
+			return $this->_restApiBadRequest();
+		}
+		if (
+			($cmd === "restore" && $this->_method() !== "POST") ||
+			($cmd !== "restore" && $this->_method() === "POST")
+		) {
+			return $this->_restApiMethodNotAllowed();
+		}
+		try {
+			$where = "`id` IN ('" . join("','", $ids) . "')";
+			if ($cmd === "destroy") {
+				$res = $class::database()->delete($class::table(), $where);
+			} else {
+				$data = ["enable" => $cmd === "restore"];
+				$res = $class::database()->update($class::table(), $data, $where);
+			}
+			return $this->_restApiOk($res);
+		} catch (Throwable $e) {
+			return $this->_restApiServerError($e);
+		}
 	}
 }

@@ -4,14 +4,19 @@
 namespace link\hefang\cms\admin\models;
 
 
+use link\hefang\mvc\databases\SqlSort;
 use link\hefang\mvc\models\BaseModel2;
 use link\hefang\mvc\models\ModelField as MF;
+use Throwable;
 
 class SettingCategoryModel extends BaseModel2
 {
 	private $id = "";
 	private $name = "";
 	private $description = "";
+	private $sort = 0;
+
+	private $settings = null;
 
 	/**
 	 * 返回模型和数据库对应的字段
@@ -24,7 +29,8 @@ class SettingCategoryModel extends BaseModel2
 		return [
 			MF::prop("id")->primaryKey()->trim(),
 			MF::prop("name")->trim(),
-			MF::prop("description")->trim()
+			MF::prop("description")->trim(),
+			MF::prop("sort")->type(MF::TYPE_INT)
 		];
 	}
 
@@ -80,5 +86,48 @@ class SettingCategoryModel extends BaseModel2
 	{
 		$this->description = $description;
 		return $this;
+	}
+
+	/**
+	 * @return SettingModel[]
+	 */
+	public function getSettings(): array
+	{
+		if ($this->settings == null) {
+			try {
+				$this->settings = SettingModel::pager(
+					1,
+					200,
+					"category='{$this->getId()}' AND `enable`=TRUE",
+					[new SqlSort("sort")]
+				)->getData();
+			} catch (Throwable $e) {
+				$this->settings = [];
+			}
+		}
+		return $this->settings;
+	}
+
+	public function toMap(): array
+	{
+		$map = parent::toMap();
+		$map["settings"] = $this->getSettings();
+		return $map;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getSort(): int
+	{
+		return $this->sort;
+	}
+
+	/**
+	 * @param int $sort
+	 */
+	public function setSort(int $sort): void
+	{
+		$this->sort = $sort;
 	}
 }

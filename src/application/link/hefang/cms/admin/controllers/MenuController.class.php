@@ -16,13 +16,16 @@ use link\hefang\mvc\databases\Sql;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\Mvc;
 use link\hefang\mvc\views\BaseView;
-use Throwable;
 
 class MenuController extends BaseCmsController
 {
+	protected function modelClass(): string
+	{
+		return MenuModel::class;
+	}
+
 	public function list(string $cmd = null): BaseView
 	{
-//		$this->_checkLogin();
 		try {
 			$pager = MenuModel::pager(
 				$this->_pageIndex(),
@@ -32,39 +35,6 @@ class MenuController extends BaseCmsController
 			);
 			return $this->_restApiOk($pager);
 		} catch (SqlException $e) {
-			return $this->_restApiServerError($e);
-		}
-	}
-
-	/**
-	 * 删除一条数据
-	 * @method DELETE
-	 * @method POST
-	 * @param string|null $cmd
-	 * @return BaseView
-	 */
-	public function delete(string $cmd = null): BaseView
-	{
-		$ids = $this->_post("ids");
-		if (!is_array($ids) || !in_array($cmd, ["recycle", "destroy", "restore"])) {
-			return $this->_restApiBadRequest();
-		}
-		if (
-			($cmd === "restore" && $this->_method() !== "POST") ||
-			($cmd !== "restore" && $this->_method() === "POST")
-		) {
-			return $this->_restApiMethodNotAllowed();
-		}
-		try {
-			$where = "`id` IN ('" . join("','", $ids) . "')";
-			if ($cmd === "destroy") {
-				$res = MenuModel::database()->delete(MenuModel::table(), $where);
-			} else {
-				$data = ["enable" => $cmd === "restore"];
-				$res = MenuModel::database()->update(MenuModel::table(), $data, $where);
-			}
-			return $this->_restApiOk($res);
-		} catch (Throwable $e) {
 			return $this->_restApiServerError($e);
 		}
 	}
@@ -89,7 +59,7 @@ class MenuController extends BaseCmsController
 			$model->setId((new GUKey("menu"))->next());
 			if (GUKey::isGuKey($id)) {
 				$model = MenuModel::get($id);
-				if (!($model instanceof MenuModel) || !$model->isExist() || !$model->isEnable()) {
+				if (!($model instanceof MenuModel) || !$model->isExist()) {
 					return $this->_restApiNotFound("要修改的菜单不存在或已被删除");
 				}
 			}

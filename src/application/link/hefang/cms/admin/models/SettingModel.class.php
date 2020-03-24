@@ -155,6 +155,7 @@ class SettingModel extends BaseModel2
 			MF::prop("key")->primaryKey()->trim(),
 			MF::prop("name")->trim(),
 			MF::prop("value")->trim(),
+			MF::prop("sort")->type(MF::TYPE_INT),
 			MF::prop("type")->trim(),
 			MF::prop("description")->trim(),
 			MF::prop("attribute")->trim(),

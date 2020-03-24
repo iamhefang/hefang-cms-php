@@ -191,40 +191,4 @@ class ArticleController extends BaseCmsController
 			return $this->_restApiServerError($exception);
 		}
 	}
-
-	/**
-	 * 删除一条数据
-	 * @method DELETE
-	 * @method POST
-	 * @param string|null $cmd
-	 * @return BaseView
-	 */
-	public function delete(string $cmd = null): BaseView
-	{
-		$ids = $this->_post("ids");
-		if (!is_array($ids) || !in_array($cmd, ["recycle", "destroy", "restore"])) {
-			return $this->_restApiBadRequest();
-		}
-		if (
-			($cmd === "restore" && $this->_method() !== "POST") ||
-			($cmd !== "restore" && $this->_method() === "POST")
-		) {
-			return $this->_restApiMethodNotAllowed();
-		}
-		try {
-			$where = "`id` IN ('" . join("','", $ids) . "')";
-			if ($cmd === "destroy") {
-				$res = ArticleModel::database()->delete(ArticleModel::table(), $where);
-			} else {
-				$data = ["enable" => $cmd === "restore"];
-				if ($cmd === "restore") {
-					$data["is_draft"] = true;
-				}
-				$res = ArticleModel::database()->update(ArticleModel::table(), $data, $where);
-			}
-			return $this->_restApiOk($res);
-		} catch (Throwable $e) {
-			return $this->_restApiServerError($e);
-		}
-	}
 }

@@ -6,7 +6,6 @@ namespace link\hefang\cms\admin\controllers;
 
 use link\hefang\cms\admin\models\SettingCategoryModel;
 use link\hefang\cms\common\controllers\BaseCmsController;
-use link\hefang\cms\HeFangCMS;
 use link\hefang\mvc\exceptions\ModelException;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\views\BaseView;
@@ -21,9 +20,13 @@ class SettingCategoryController extends BaseCmsController
 	 */
 	public function list(string $cmd = null): BaseView
 	{
-		$search = $this->_request(HeFangCMS::queryKey());
 		try {
-			$pager = SettingCategoryModel::pager($this->_pageIndex(), $this->_pageSize(), $search);
+			$pager = SettingCategoryModel::pager(
+				$this->_pageIndex(),
+				100,
+				null,
+				SettingCategoryModel::sort2sql($this->_sort("sort"))
+			);
 			return $this->_restApiOk($pager);
 		} catch (SqlException $e) {
 			return $this->_restApiServerError($e, "读取数据时出现异常");
