@@ -60,7 +60,20 @@ abstract class BaseCmsController extends BaseController implements SGLD
 		if (!($login instanceof AccountModel)) {
 			$this->_restApiUnauthorized($message)->compile()->render();
 		}
+		return $login;
+	}
 
+	/**
+	 * 检查当前用户是否已锁屏, 如果没有登录或已锁屏, 直接响应错误信息到客户端
+	 * @param string $message
+	 * @return AccountModel
+	 */
+	public function _checkLockedScreen(string $message = "您当前已锁屏, 请先解锁"): AccountModel
+	{
+		$login = $this->_checkLogin();
+		if ($login->isLockedScreen()) {
+			$this->_restApiLocked($message)->compile()->render();
+		}
 		return $login;
 	}
 

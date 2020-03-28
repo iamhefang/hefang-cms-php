@@ -4,12 +4,12 @@
 namespace link\hefang\cms\user\controllers;
 
 
+use Exception;
 use link\hefang\cms\admin\models\MenuModel;
 use link\hefang\cms\common\controllers\BaseCmsController;
 use link\hefang\cms\user\models\AccountModel;
 use link\hefang\helpers\HashHelper;
 use link\hefang\helpers\StringHelper;
-use link\hefang\helpers\TimeHelper;
 use link\hefang\mvc\exceptions\ModelException;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\Mvc;
@@ -18,16 +18,85 @@ use link\hefang\mvc\views\BaseView;
 class AccountController extends BaseCmsController
 {
 
-	public function initRoot(): BaseView
+//	public function initRoot(): BaseView
+//	{
+//		$root = new AccountModel();
+//		$root->setId("root")
+//			->setName("Administrator")
+//			->setRegisterTime(TimeHelper::formatMillis())
+//			->setRegisterType("System Init")
+//			->setPassword(HashHelper::passwordHash(sha1("111111") . md5("111111"), "(*lfwekjfO*gklswjefwFDSefwgwlekjf"))
+//			->setRoleId("admin");
+//		return $this->_text($root->insert());
+//	}
+
+	/**
+	 * 系统心跳, 用于在锁屏时保持在线和通知消息获取
+	 * @return BaseView
+	 */
+	public function heartbeat(): BaseView
 	{
-		$root = new AccountModel();
-		$root->setId("root")
-			->setName("Administrator")
-			->setRegisterTime(TimeHelper::formatMillis())
-			->setRegisterType("System Init")
-			->setPassword(HashHelper::passwordHash(sha1("111111") . md5("111111"), "(*lfwekjfO*gklswjefwFDSefwgwlekjf"))
-			->setRoleId("admin");
-		return $this->_text($root->insert());
+		$login = $this->_checkLogin();
+
+		return $this->_restApiOk([]);
+	}
+
+	/**
+	 * @param string $lock
+	 * lock: 锁屏
+	 * unlock: 解锁
+	 * @return BaseView
+	 */
+	public function screen(string $lock): BaseView
+	{
+		if (!$lock || !in_array(strtolower($lock), ["lock", "unlock"])) {
+			return $this->_restApiBadRequest("接口不存在");
+		}
+		$login = $this->_checkLogin();
+		$pwd = $this->_post("password");
+
+		if ($lock == "unlock") {
+			if (StringHelper::isNullOrBlank($pwd) || strlen($pwd) !== 72) {
+				return $this->unlockFailed($login);
+			}
+			$isMatchLockPwd = $login->getScreenLockPassword() && HashHelper::passwordVerify($pwd, $login->getScreenLockPassword(), Mvc::getPasswordSalt());
+			if ($isMatchLockPwd
+				|| HashHelper::passwordVerify($pwd, $login->getPassword(), Mvc::getPasswordSalt())) {
+				$login->setUnLockTries(0)->setIsLockedScreen(false)->updateSession($this);
+				return $this->_restApiOk($login);
+			} else {
+				return $this->unlockFailed($login);
+			}
+		}
+
+		if (!StringHelper::isNullOrEmpty($pwd)) {
+			if (strlen($pwd) === 72) {
+				$login->setScreenLockPassword(HashHelper::passwordHash($pwd, Mvc::getPasswordSalt()));
+			} else {
+				return $this->_restApiBadRequest();
+			}
+		}
+		$login
+			->setIsLockedScreen(strtolower($lock) === "lock")
+			->updateSession($this);
+
+		try {
+			$login->update(["screen_lock_password"]);
+		} catch (Exception $e) {
+		}
+
+		return $this->_restApiOk($login);
+	}
+
+	private function unlockFailed(AccountModel $login): BaseView
+	{
+		$login->setUnLockTries($login->getUnLockTries() + 1);
+		if ($login->getUnLockTries() >= AccountModel::MAX_UNLOCK_TRY) {
+			$login->logout();
+			return $this->_restApiUnauthorized("重试次数过多, 请重新登录");
+		}
+		$login->updateSession($this);
+		return $this->_restApiBadRequest("解锁失败, 您还可以重试" . (AccountModel::MAX_UNLOCK_TRY - $login->getUnLockTries()) . "次");
 	}
 
 	/**
@@ -69,7 +138,7 @@ class AccountController extends BaseCmsController
 	{
 		$login = $this->_checkLogin();
 		if ($login instanceof AccountModel) {
-			$login->logout($this);
+			$login->logout();
 		}
 		return $this->_restApiOk();
 	}

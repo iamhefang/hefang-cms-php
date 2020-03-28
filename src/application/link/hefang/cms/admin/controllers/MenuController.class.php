@@ -48,27 +48,21 @@ class MenuController extends BaseCmsController
 		if (!$login->isAdmin()) {
 			return $this->_restApiForbidden("该功能只有管理员才能使用");
 		}
-		$id = $this->_post("id");
-		$parentId = $this->_post("parentId");
-		$name = $this->_post("name");
-		$path = $this->_post("path");
-		$icon = $this->_post("icon");
-		$sort = $this->_post("sort");
+		$data = $this->_post();
 		try {
-			$model = new MenuModel();
-			$model->setId((new GUKey("menu"))->next());
 			if (GUKey::isGuKey($id)) {
 				$model = MenuModel::get($id);
 				if (!($model instanceof MenuModel) || !$model->isExist()) {
 					return $this->_restApiNotFound("要修改的菜单不存在或已被删除");
 				}
+			} else {
+				$model = new MenuModel();
+				$model->setId((new GUKey("menu"))->next());
 			}
-			$model->setName($name)
-				->setParentId($parentId)
-				->setPath($path)
-				->setIcon($icon)
-				->setSort($sort);
-			$res = GUKey::isGuKey($id) ? $model->update(["name", "path", "icon", "sort", "parent_id"]) : $model->insert();
+			foreach ($data as $prop => $value) {
+				$model->setValue2Prop($value, $prop);
+			}
+			$res = GUKey::isGuKey($id) ? $model->update(array_keys($data)) : $model->insert();
 			if ($res) {
 				Mvc::getCache()->remove("all-menus");
 			}

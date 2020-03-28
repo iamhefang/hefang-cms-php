@@ -5,6 +5,7 @@ namespace link\hefang\cms\user\models;
 
 
 use link\hefang\helpers\RandomHelper;
+use link\hefang\helpers\StringHelper;
 use link\hefang\helpers\TimeHelper;
 use link\hefang\mvc\controllers\BaseController;
 use link\hefang\mvc\models\BaseModel2;
@@ -25,9 +26,33 @@ class AccountModel extends BaseModel2
 	private $lockedTime = null;
 	private $avatar = null;
 	private $enable = true;
+	private $screenLockPassword = null;
+
+	/**
+	 * @return null|string
+	 */
+	public function getScreenLockPassword()
+	{
+		return $this->screenLockPassword;
+	}
+
+	/**
+	 * @param null|string $screenLockPassword
+	 * @return AccountModel
+	 */
+	public function setScreenLockPassword($screenLockPassword): AccountModel
+	{
+		$this->screenLockPassword = $screenLockPassword;
+		return $this;
+	}
+
 	private $loginTime = null;
 	private $loginIp = null;
 	private $token = null;
+	private $isLockedScreen = false;
+	private $unLockTries = 0;
+
+	const MAX_UNLOCK_TRY = 5;
 
 	/**
 	 * 返回模型和数据库对应的字段
@@ -42,37 +67,45 @@ class AccountModel extends BaseModel2
 			MF::prop("roleId")->trim(),
 			MF::prop("name")->trim(),
 			MF::prop("avatar"),
-			MF::prop("password"),
+			MF::prop("password")->hide(),
 			MF::prop("registerTime"),
 			MF::prop("registerType"),
 			MF::prop("email")->trim(),
 			MF::prop("locked")->type(MF::TYPE_BOOL),
 			MF::prop("lockedTime"),
 			MF::prop("enable")->type(MF::TYPE_BOOL),
+			MF::prop("screenLockPassword")->hide()
 		];
 	}
 
 	public function login(BaseController $controller)
 	{
-		$authType = strtoupper(Mvc::getProperty("project.auth.type", "SESSION"));
 		$this->loginTime = TimeHelper::formatMillis();
 		$this->loginIp = $controller->_ip();
+		$this->updateSession($controller);
+	}
+
+	public function updateSession(BaseController $controller): AccountModel
+	{
+		$authType = strtoupper(Mvc::getProperty("project.auth.type", "SESSION"));
 		if ($authType === "TOKEN") {
-			$this->token = RandomHelper::guid();
+			if (StringHelper::isNullOrBlank($this->token)) {
+				$this->token = RandomHelper::guid();
+			}
 			Mvc::getCache()->set($this->token, $this);
 		} else {
 			$controller->_setSession(self::ACCOUNT_SESSION_KEY, $this);
 		}
+		return $this;
 	}
 
-	public function logout(BaseController $controller)
+	public function logout()
 	{
 		$authType = strtoupper(Mvc::getProperty("project.auth.type", "SESSION"));
-		if ($authType === "TOKEN") {
-			$this->token = RandomHelper::guid();
+		if ($authType === "TOKEN" && !StringHelper::isNullOrBlank($this->token)) {
 			Mvc::getCache()->remove($this->token);
 		} else {
-			$controller->_setSession(self::ACCOUNT_SESSION_KEY, null);
+			session_destroy();
 		}
 	}
 
@@ -272,6 +305,7 @@ class AccountModel extends BaseModel2
 		$map["loginIp"] = $this->getLoginIp();
 		$map["isAdmin"] = $this->isAdmin();
 		$map["isSuperAdmin"] = $this->isSuperAdmin();
+		$map["isLockedScreen"] = $this->isLockedScreen();
 
 		return $map;
 	}
@@ -327,4 +361,41 @@ class AccountModel extends BaseModel2
 		$this->id = $id;
 		return $this;
 	}
+
+	/**
+	 * @return bool
+	 */
+	public function isLockedScreen(): bool
+	{
+		return $this->isLockedScreen;
+	}
+
+	/**
+	 * @param bool $isLockedScreen
+	 * @return AccountModel
+	 */
+	public function setIsLockedScreen(bool $isLockedScreen): AccountModel
+	{
+		$this->isLockedScreen = $isLockedScreen;
+		return $this;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getUnLockTries(): int
+	{
+		return $this->unLockTries;
+	}
+
+	/**
+	 * @param int $unLockTries
+	 * @return AccountModel
+	 */
+	public function setUnLockTries(int $unLockTries): AccountModel
+	{
+		$this->unLockTries = $unLockTries;
+		return $this;
+	}
+
 }
