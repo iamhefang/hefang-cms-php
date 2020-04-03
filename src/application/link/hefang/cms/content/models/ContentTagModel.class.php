@@ -9,12 +9,15 @@ use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\models\BaseModel2;
 use link\hefang\mvc\models\ModelField as MF;
 use link\hefang\mvc\Mvc;
+use Throwable;
 
 class ContentTagModel extends BaseModel2
 {
 	private $contentId = "";
 	private $tag = "";
 	private $type = null;
+
+	private $contentCount = 0;
 
 	public static function saveTag(string $id, string $type, array $tags): int
 	{
@@ -106,5 +109,30 @@ class ContentTagModel extends BaseModel2
 	{
 		$this->tag = $tag;
 		return $this;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getContentCount(): int
+	{
+		if (!$this->contentCount) {
+			try {
+				$this->contentCount = ContentTagModel::database()->count(
+					ContentTagModel::table(),
+					new Sql("`tag`=:tag", ["tag" => $this->getTag()])
+				);
+			} catch (Throwable $e) {
+				$this->contentCount = 0;
+			}
+		}
+		return $this->contentCount;
+	}
+
+	public function toMap(): array
+	{
+		$map = parent::toMap();
+		$map["contentCount"] = $this->getContentCount();
+		return $map;
 	}
 }

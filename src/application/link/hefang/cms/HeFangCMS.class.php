@@ -7,6 +7,7 @@ namespace link\hefang\cms;
 use link\hefang\cms\admin\models\SettingModel;
 use link\hefang\cms\common\helpers\CacheHelper;
 use link\hefang\cms\content\models\ArticleModel;
+use link\hefang\helpers\CollectionHelper;
 use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\entities\Router;
 use link\hefang\mvc\entities\StatusResult;
@@ -20,6 +21,9 @@ use Throwable;
 class HeFangCMS extends SimpleApplication
 {
 	const PREFIX_APIS = "/apis/";
+	const PREFIX_TAGS = "/tags/";
+	const PREFIX_CATEGORY = "/category/";
+	const PATH_SEARCH = "/search.html";
 
 	public static function queryKey(): string
 	{
@@ -60,6 +64,17 @@ class HeFangCMS extends SimpleApplication
 		if (StringHelper::startsWith($path, true, self::PREFIX_APIS)) {
 			$path = substr($path, strlen(self::PREFIX_APIS) - 1);
 			return Router::parsePath($path);
+		}
+		if (StringHelper::startsWith($path, true, self::PREFIX_CATEGORY)) {
+			$id = CollectionHelper::last(explode("/", $path), "");
+			return new Router("main", "home", "category", explode(".", $id)[0]);
+		}
+		if (StringHelper::startsWith($path, true, self::PREFIX_TAGS)) {
+			$tag = CollectionHelper::last(explode("/", $path), "");
+			return new Router("main", "home", "tags", explode(".", $tag)[0]);
+		}
+		if (strcasecmp($path, self::PATH_SEARCH) == 0) {
+			return new Router("main", "home", "search");
 		}
 		// /.html
 		if (strlen($path) > 6) {

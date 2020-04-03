@@ -13,6 +13,10 @@ class ThemeController extends BaseCmsController
 {
 	public function list(string $cmd = null): BaseView
 	{
+		$login = $this->_checkLogin();
+		if (!$login->isAdmin()) {
+			return $this->_restApiForbidden();
+		}
 		$themes = CacheHelper::cacheOrFetch("themes", function () {
 			$themeDirs = scandir(PATH_THEMES);
 			$themeArray = [];
@@ -21,6 +25,7 @@ class ThemeController extends BaseCmsController
 				if ($themeDir === "." || $themeDir === ".." || !is_file($file)) continue;
 				$theme = json_decode(file_get_contents($file), true);
 				$theme["isCurrent"] = Mvc::getConfig("site|theme") === $theme["id"];
+				unset($theme["\$schema"]);
 				$themeArray[] = $theme;
 			}
 			return $themeArray;

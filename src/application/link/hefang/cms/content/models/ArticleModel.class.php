@@ -51,6 +51,7 @@ class ArticleModel extends BaseModel2
 			MF::prop("opposeCount")->type(MF::TYPE_INT),
 			MF::prop("isDraft")->type(MF::TYPE_BOOL),
 			MF::prop("categoryId")->trim(),
+			MF::prop("type")->trim(),
 			MF::prop("isPrivate")->type(MF::TYPE_BOOL),
 			MF::prop("enable")->type(MF::TYPE_BOOL),
 			MF::prop("extra")
