@@ -33,9 +33,9 @@ return [
 	'project.auth.type' => 'SESSION', //TOKEN, SESSION
 	'database.enable' => true,
 	'database.class' => 'link.hefang.mvc.databases.Mysql',
-	'database.host' => 'hefang.link',
+	'database.host' => 'localhost',
 	'database.port' => null,
-	'database.username' => 'temp',
+	'database.username' => 'root',
 	'database.password' => '111111',
 	'database.charset' => 'utf8mb4',
 	'database.database' => 'hefang-cms',

@@ -6,6 +6,7 @@ namespace link\hefang\cms\content\models;
 
 use link\hefang\cms\user\models\AccountModel;
 use link\hefang\mvc\databases\Sql;
+use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\models\BaseModel2;
 use link\hefang\mvc\models\ModelField as MF;
 use link\hefang\mvc\Mvc;
@@ -318,6 +319,7 @@ class ArticleModel extends BaseModel2
 		$map["tags"] = $this->getTags();
 		$map["categoryName"] = $this->getCategoryName();
 		$map["authorName"] = $this->getAuthorName();
+		$map["commentCount"] = $this->getCommentCount();
 		return $map;
 	}
 
@@ -469,5 +471,19 @@ class ArticleModel extends BaseModel2
 			}
 		}
 		return $this->commentCount;
+	}
+
+	public function readCountPlus()
+	{
+		$tablePrefix = Mvc::getTablePrefix();
+		try {
+			self::database()->executeQuery(new Sql(
+				"UPDATE `{$tablePrefix}article` SET `read_count` = `read_count` + 1 WHERE `id` = :id",
+				["id" => $this->getId()]
+			));
+			$this->setReadCount($this->getReadCount() + 1);
+			Mvc::getCache()->set($this->getId(), $this);
+		} catch (SqlException $e) {
+		}
 	}
 }

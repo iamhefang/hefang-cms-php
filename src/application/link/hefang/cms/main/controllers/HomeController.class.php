@@ -113,6 +113,8 @@ class HomeController extends BaseCmsController
 				return $this->_errorView("访问的文章还未发表");
 			}
 
+			$article->readCountPlus();
+
 			return $this->_template($this->makeTplData([
 				"article" => $article->toMap(),
 				"title" => $article->getTitle(),
