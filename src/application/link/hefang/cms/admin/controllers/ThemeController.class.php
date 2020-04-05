@@ -17,7 +17,7 @@ class ThemeController extends BaseCmsController
 		if (!$login->isAdmin()) {
 			return $this->_restApiForbidden();
 		}
-		$themes = CacheHelper::cacheOrFetch("themes", function () {
+		$themes = CacheHelper::cacheOrFetch(__FUNCTION__ . "themes", function () {
 			$themeDirs = scandir(PATH_THEMES);
 			$themeArray = [];
 			foreach ($themeDirs as $themeDir) {

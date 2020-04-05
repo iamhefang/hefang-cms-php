@@ -38,3 +38,5 @@ libraries/
 /src/data/
 node_modules/
 /src/themes/hefangblog/
+
+plugin-enabled

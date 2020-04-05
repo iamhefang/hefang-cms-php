@@ -1,0 +1,228 @@
+{
+	"$id": "https://hefang.link/schema/hefang-cms/plugin.schema.json",
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"description": "插件声明文件",
+	"required": [
+		"id",
+		"name",
+		"version",
+		"supportVersion",
+		"className"
+	],
+	"properties": {
+		"id": {
+			"description": "插件ID",
+			"type": "string",
+			"pattern": "^[a-z][a-z0-9\\-]+[a-z]$"
+		},
+		"name": {
+			"description": "插件名称",
+			"type": "string"
+		},
+		"version": {
+			"description": "插件版本号",
+			"type": "string"
+		},
+		"supportVersion": {
+			"description": "插件支持的hefang-cms版本",
+			"type": "string",
+			"anyOf": [
+				{
+					"$ref": "#/definitions/supportVersion"
+				},
+				{
+					"type": "array",
+					"items": {
+						"$ref": "#/definitions/supportVersion"
+					}
+				}
+			]
+		},
+		"dependsOn": {
+			"description": "依赖的其他插件",
+			"type": "array",
+			"minItems": 1,
+			"items": {
+				"type": "string"
+			}
+		},
+		"namespace": {
+			"description": "插件类命名空间",
+			"type": "string"
+		},
+		"className": {
+			"description": "插件类名",
+			"type": "string",
+			"pattern": "[A-Z][a-z0-9]+Plugin"
+		},
+		"hooks": {
+			"description": "声明插件钩子",
+			"type": "array",
+			"uniqueItems": true,
+			"minItems": 1,
+			"items": {
+				"type": "string",
+				"enum": [
+					"all",
+					"request",
+					"exception",
+					"before-model-grud",
+					"after-model-grud"
+				]
+			}
+		},
+		"scripts": {
+			"description": "在特定周期执行的文件",
+			"type": "object",
+			"properties": {
+				"install": {
+					"description": "插件安装时执行",
+					"type": "string"
+				},
+				"uninstall": {
+					"description": "插件卸载时执行",
+					"type": "string"
+				}
+			}
+		},
+		"controllers": {
+			"description": "插件提供的控制器类名",
+			"type": "array",
+			"items": {
+				"type": "string",
+				"pattern": "[A-Z][a-z0-9]+Controller"
+			}
+		},
+		"models": {
+			"description": "插件提供的模型类名",
+			"type": "array",
+			"items": {
+				"type": "string",
+				"pattern": "[A-Z][a-z0-9]+Model"
+			}
+		},
+		"description": {
+			"description": "插件描述",
+			"type": "string"
+		},
+		"tags": {
+			"description": "插件标签",
+			"type": "array",
+			"uniqueItems": true,
+			"minItems": 0,
+			"items": {
+				"type": "string"
+			}
+		},
+		"homepage": {
+			"description": "插件主页",
+			"type": "string"
+		},
+		"issues": {
+			"description": "插件反馈页",
+			"type": "string"
+		},
+		"author": {
+			"description": "插件作者信息",
+			"$ref": "#/definitions/author"
+		},
+		"settings": {
+			"description": "插件设置",
+			"type": "array",
+			"items": {
+				"$ref": "#/definitions/settingItem"
+			}
+		}
+	},
+	"definitions": {
+		"author": {
+			"type": "object",
+			"required": [
+				"name"
+			],
+			"properties": {
+				"name": {
+					"description": "作者称呼",
+					"type": "string"
+				},
+				"email": {
+					"description": "作者邮箱",
+					"type": "string"
+				},
+				"site": {
+					"description": "作者个人网站",
+					"type": "string"
+				}
+			}
+		},
+		"supportVersion": {
+			"type": "string",
+			"pattern": "([><]\\d+(\\.\\d+){0,2})|(\\*)"
+		},
+		"settingItem": {
+			"type": "object",
+			"required": [
+				"key",
+				"name",
+				"type"
+			],
+			"properties": {
+				"key": {
+					"type": "string",
+					"description": "配置项的key",
+					"minLength": 1,
+					"maxLength": 64
+				},
+				"name": {
+					"type": "string",
+					"description": "配置项名称",
+					"minLength": 1,
+					"maxLength": 32
+				},
+				"attributes": {
+					"description": "设置项渲染时的属性",
+					"anyOf": [
+						{
+							"type": "object",
+							"description": "text"
+						}
+					]
+				},
+				"type": {
+					"type": "string",
+					"description": "配置项类型",
+					"enum": [
+						"object",
+						"number",
+						"textarea",
+						"text",
+						"html",
+						"boolean",
+						"image",
+						"code",
+						"checkbox",
+						"radio",
+						"date",
+						"datetime",
+						"time",
+						"range"
+					]
+				},
+				"description": {
+					"type": "string",
+					"description": "配置项描述"
+				},
+				"default": {
+					"type": [
+						"object",
+						"string",
+						"number",
+						"boolean",
+						"array"
+					],
+					"description": "配置项默认值"
+				}
+			}
+		}
+	}
+}

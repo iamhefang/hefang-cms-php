@@ -16,6 +16,52 @@ use Throwable;
 
 class HomeController extends BaseCmsController
 {
+//	public function transfer(): BaseView
+//	{
+//		try {
+//			$pager = ArticleCopy1Model::pager(1, 1000);
+//			/**
+//			 * @var ArticleCopy1Model[]
+//			 */
+//			$data = $pager->getData();
+//			$count = 0;
+//			foreach ($data as $item) {
+//				if (!($item instanceof ArticleCopy1Model)) continue;
+//				try {
+//					$count += (new ArticleModel())
+//						->setId($item->getId())
+//						->setTitle($item->getTitle())
+//						->setPath("/article/{$item->getAlias()}.html")
+//						->setKeywords($item->getKeywords())
+//						->setDescription($item->getDescription())
+//						->setContent($item->getHtml())
+//						->setPostTime($item->getPostTime())
+//						->setLastAlterTime($item->getLastAlterTime())
+//						->setAuthorId($item->getAuthorId())
+//						->setReadCount($item->getReadCount())
+//						->setApprovalCount($item->getUpCount())
+//						->setOpposeCount(0)
+//						->setIsDraft($item->isDraft())
+//						->setCategoryId($item->getCateId())
+//						->setEnable($item->isEnable())
+//						->setType($item->getType())
+//						->setExtra(json_encode([
+//							"markdown" => $item->getMarkdown(),
+//							"reprint" => $item->getReprintFrom(),
+//							"covers" => $item->getCovers()
+//						], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))
+//						->insert() ? 1 : 0;
+//				} catch (Throwable $e) {
+//					Mvc::getLogger()->error($e->getMessage(), $item->getTitle(), $e);
+//				}
+//			}
+//			return $this->_text($count);
+//		} catch (Throwable $e) {
+//			return $this->_restApiServerError($e);
+//		}
+//
+//	}
+
 	/**
 	 * 首页
 	 * @return BaseView
@@ -23,7 +69,9 @@ class HomeController extends BaseCmsController
 	public function index(): BaseView
 	{
 		return $this->_template($this->makeTplData([
-			"title" => "首页"
+			"title" => "首页",
+			"pageIndex" => $this->_pageIndex(),
+			"pageSize" => $this->_pageSize()
 		]), "index");
 	}
 
@@ -35,9 +83,15 @@ class HomeController extends BaseCmsController
 			"keywords" => Mvc::getConfig("site|keywords"),
 			"description" => Mvc::getConfig("site|description"),
 			"author" => "",
+			"icp" => Mvc::getConfig("site|icp")
 		], $data, [
 			"title" => "{$title} - {$name}",
 		]);
+	}
+
+	public function tools(): BaseView
+	{
+		return $this->_template($this->makeTplData([]));
 	}
 
 	/**
@@ -97,7 +151,10 @@ class HomeController extends BaseCmsController
 			);
 			return $this->_template($this->makeTplData([
 				"pager" => $pager,
-				"message" => "搜索：{$keywords}"
+				"message" => "搜索：{$keywords}",
+				"search" => $keywords,
+				"pageIndex" => $this->_pageIndex(),
+				"pageSize" => $this->_pageSize()
 			]), "list");
 		} catch (Throwable $e) {
 			return $this->_errorView($e->getMessage());
@@ -118,7 +175,9 @@ class HomeController extends BaseCmsController
 			);
 			return $this->_template($this->makeTplData([
 				"pager" => $pager,
-				"message" => "标签：{$tag}"
+				"message" => "标签：{$tag}",
+				"pageIndex" => $this->_pageIndex(),
+				"pageSize" => $this->_pageSize()
 			]), "list");
 		} catch (Throwable $e) {
 			return $this->_errorView($e->getMessage());

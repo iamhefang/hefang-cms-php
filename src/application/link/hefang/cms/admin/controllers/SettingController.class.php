@@ -49,7 +49,9 @@ class SettingController extends BaseCmsController
 	public function get(string $id = null): BaseView
 	{
 		$id = $this->_request("id", $id);
-		[$category, $key] = explode("|", $id);
+		$kv = explode("|", $id);
+		$category = $kv[0];
+		$key = $kv[1];
 		$category = $this->_request("category", $category);
 		$key = $this->_request("key", $key);
 		if (StringHelper::isNullOrBlank($category) || StringHelper::isNullOrBlank($key)) {

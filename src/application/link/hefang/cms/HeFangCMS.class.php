@@ -3,15 +3,19 @@
 
 namespace link\hefang\cms;
 
-
 use link\hefang\cms\admin\models\SettingModel;
 use link\hefang\cms\common\helpers\CacheHelper;
 use link\hefang\cms\content\models\ArticleModel;
+use link\hefang\cms\core\plugin\entities\PluginEntry;
+use link\hefang\cms\core\plugin\helpers\PluginHelper;
+use link\hefang\cms\core\plugin\PluginManager;
+use link\hefang\helpers\ClassHelper;
 use link\hefang\helpers\CollectionHelper;
 use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\entities\Router;
 use link\hefang\mvc\entities\StatusResult;
 use link\hefang\mvc\exceptions\MethodNotAllowException;
+use link\hefang\mvc\helpers\DebugHelper;
 use link\hefang\mvc\Mvc;
 use link\hefang\mvc\SimpleApplication;
 use link\hefang\mvc\views\BaseView;
@@ -25,22 +29,32 @@ class HeFangCMS extends SimpleApplication
 	const PREFIX_CATEGORY = "/category/";
 	const PATH_SEARCH = "/search.html";
 
-	public static function queryKey(): string
-	{
-		return Mvc::getProperty("project.query.field.name", "query");
-	}
 
-	public static function sortKey(): string
+	public function __construct()
 	{
-		return Mvc::getProperty("project.sort.field.name", "sort");
+		$plugins = PluginManager::listPlugins();
+		foreach ($plugins as $pluginEntry) {
+			if (!$pluginEntry->isEnable()) continue;
+			DebugHelper::addPlugin($pluginEntry);
+			ClassHelper::loader($pluginEntry->getPluginDir());
+			if (!empty($pluginEntry->getControllers())) {
+				Mvc::addControllers($pluginEntry->getControllers(), "plugin-{$pluginEntry->getId()}");
+			}
+			$pluginClass = $pluginEntry->getClassName();
+			$manager = new PluginManager($pluginEntry);
+			new $pluginClass($manager);
+		}
 	}
 
 	public function onInit()
 	{
 		$settings = SettingModel::allValues();
 		Mvc::getLogger()->debug(print_r($settings, true), "初始化时读取到配置项");
-		return $settings;
+		$event = PluginManager::executeHooks(HEFANG_CMS_EVENT_INIT, $settings);
+		Mvc::getLogger()->debug(print_r($event->getData(), true), "插件返回新的配置项");
+		return $event->getData();
 	}
+
 
 	/**
 	 * @param Throwable $e
@@ -55,12 +69,22 @@ class HeFangCMS extends SimpleApplication
 				));
 			}
 		}
+		print_r(get_declared_classes());
 		return null;
 	}
 
 	public function onRequest(string $path)
 	{
 		Mvc::getLogger()->debug("Request: " . $path);
+		$event = PluginManager::executeHooks(HEFANG_CMS_EVENT_REQUEST, $path);
+		$router = $event->getData();
+		if ($router instanceof Router) {
+			/**
+			 * @var PluginEntry
+			 */
+			$pluginEntry = CollectionHelper::last($event->getPluginPath());
+			return $router->setModule("plugin-{$pluginEntry->getId()}");
+		}
 		if (StringHelper::startsWith($path, true, self::PREFIX_APIS)) {
 			$path = substr($path, strlen(self::PREFIX_APIS) - 1);
 			return Router::parsePath($path);
@@ -86,5 +110,15 @@ class HeFangCMS extends SimpleApplication
 			}
 		}
 		return parent::onRequest($path);
+	}
+
+	public static function queryKey(): string
+	{
+		return Mvc::getProperty("project.query.field.name", "query");
+	}
+
+	public static function sortKey(): string
+	{
+		return Mvc::getProperty("project.sort.field.name", "sort");
 	}
 }

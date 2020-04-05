@@ -5,6 +5,7 @@ namespace link\hefang\cms\content\models;
 
 
 use link\hefang\cms\user\models\AccountModel;
+use link\hefang\mvc\databases\Sql;
 use link\hefang\mvc\models\BaseModel2;
 use link\hefang\mvc\models\ModelField as MF;
 use link\hefang\mvc\Mvc;
@@ -33,6 +34,7 @@ class ArticleModel extends BaseModel2
 	private $tags = [];
 	private $categoryName = null;
 	private $authorName = null;
+	private $commentCount = null;
 
 	public static function fields(): array
 	{
@@ -113,36 +115,36 @@ class ArticleModel extends BaseModel2
 	}
 
 	/**
-	 * @return string
+	 * @return string|null
 	 */
-	public function getKeywords(): string
+	public function getKeywords()
 	{
 		return $this->keywords;
 	}
 
 	/**
-	 * @param string $keywords
+	 * @param string|null $keywords
 	 * @return ArticleModel
 	 */
-	public function setKeywords(string $keywords): ArticleModel
+	public function setKeywords($keywords): ArticleModel
 	{
 		$this->keywords = $keywords;
 		return $this;
 	}
 
 	/**
-	 * @return string
+	 * @return string|null
 	 */
-	public function getDescription(): string
+	public function getDescription()
 	{
 		return $this->description;
 	}
 
 	/**
-	 * @param string $description
+	 * @param string|null $description
 	 * @return ArticleModel
 	 */
-	public function setDescription(string $description): ArticleModel
+	public function setDescription($description): ArticleModel
 	{
 		$this->description = $description;
 		return $this;
@@ -193,10 +195,10 @@ class ArticleModel extends BaseModel2
 	}
 
 	/**
-	 * @param string $lastAlterTime
+	 * @param string|null $lastAlterTime
 	 * @return ArticleModel
 	 */
-	public function setLastAlterTime(string $lastAlterTime): ArticleModel
+	public function setLastAlterTime($lastAlterTime): ArticleModel
 	{
 		$this->lastAlterTime = $lastAlterTime;
 		return $this;
@@ -395,9 +397,9 @@ class ArticleModel extends BaseModel2
 	}
 
 	/**
-	 * @return string
+	 * @return string|null
 	 */
-	public function getAuthorName(): string
+	public function getAuthorName()
 	{
 		if (!$this->authorName && $this->authorId) {
 			try {
@@ -415,18 +417,18 @@ class ArticleModel extends BaseModel2
 	}
 
 	/**
-	 * @return string
+	 * @return string|null
 	 */
-	public function getAuthorId(): string
+	public function getAuthorId()
 	{
 		return $this->authorId;
 	}
 
 	/**
-	 * @param string $authorId
+	 * @param string|null $authorId
 	 * @return ArticleModel
 	 */
-	public function setAuthorId(string $authorId): ArticleModel
+	public function setAuthorId($authorId): ArticleModel
 	{
 		$this->authorId = $authorId;
 		return $this;
@@ -448,5 +450,24 @@ class ArticleModel extends BaseModel2
 	{
 		$this->extra = $extra;
 		return $this;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getCommentCount(): int
+	{
+		if ($this->commentCount === null) {
+			try {
+				$this->commentCount = CommentModel::database()->count(
+					CommentModel::table(),
+					new Sql("`content_id`=:contentId", ["contentId" => $this->getId()])
+				);
+			} catch (Throwable $e) {
+				Mvc::getLogger()->error($e->getMessage(), "获取文章评论数时异常", $e);
+				$this->commentCount = 0;
+			}
+		}
+		return $this->commentCount;
 	}
 }

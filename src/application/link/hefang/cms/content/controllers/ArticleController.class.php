@@ -101,6 +101,7 @@ class ArticleController extends BaseCmsController
 	 */
 	public function get(string $id = null): BaseView
 	{
+		$login = $this->_checkLogin();
 		$id = $this->_request("id", $id);
 		if (!GUKey::isGuKey($id)) {
 			return $this->_restApiBadRequest("参数异常");
@@ -135,29 +136,25 @@ class ArticleController extends BaseCmsController
 	 */
 	public function list(string $cmd = null): BaseView
 	{
-		$login = $this->_getLogin();
+		$login = $this->_checkLogin();
 		$category = $this->_request("category");
 		$tag = $this->_request("tag");
 		$whereArr = [];
 
-		if ($login instanceof AccountModel) {
-			if ($login->isAdmin()) {
-				$showDisabled = $this->_request("showDisabled");
-				$author = $this->_request("author");
-				if (!StringHelper::isNullOrBlank($showDisabled)) {
-					$showDisabled = ParseHelper::parseBoolean($showDisabled);
-					if (!$showDisabled) {
-						$whereArr[] = "enable = TRUE";
-					}
+		if ($login->isAdmin()) {
+			$showDisabled = $this->_request("showDisabled");
+			$author = $this->_request("author");
+			if (!StringHelper::isNullOrBlank($showDisabled)) {
+				$showDisabled = ParseHelper::parseBoolean($showDisabled);
+				if (!$showDisabled) {
+					$whereArr[] = "enable = TRUE";
 				}
-				if (!StringHelper::isNullOrBlank($author) && strlen($author) === 40) {
-					$whereArr[] = "`author` = '{$author}'";
-				}
-			} else {
-				$whereArr[] = "`author`='{$login->getId()}'";
+			}
+			if (!StringHelper::isNullOrBlank($author) && strlen($author) === 40) {
+				$whereArr[] = "`author` = '{$author}'";
 			}
 		} else {
-			$whereArr[] = "enable = TRUE AND is_draft = FALSE";
+			$whereArr[] = "`author`='{$login->getId()}'";
 		}
 
 		$categoryTable = Mvc::getTablePrefix() . "category";

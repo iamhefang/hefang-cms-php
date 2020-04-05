@@ -1,0 +1,26 @@
+{
+	"$schema": "https://hefang.link/schema/hefang-cms/plugin.schema.json",
+	"id": "hefang-cms-inner-plugin-rss",
+	"name": "何方博客",
+	"version": "1.0.0",
+	"supportVersion": "*",
+	"author": {
+		"name": "hefang",
+		"email": "he@hefang.link",
+		"site": "https://hefang.link"
+	},
+	"tags": [
+		"官方",
+		"可配置",
+		"RSS"
+	],
+	"description": "何方博客",
+	"className": "RssPlugin",
+	"namespace": "link.hefang.cms.plugins.rss",
+	"scripts": {
+		"load": "load.php"
+	},
+	"controllers": [
+		"link.hefang.cms.plugins.rss.controllers.RssController"
+	]
+}
