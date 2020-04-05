@@ -37,24 +37,6 @@ class SettingCategoryModel extends BaseModel2
 	/**
 	 * @return string
 	 */
-	public function getId(): string
-	{
-		return $this->id;
-	}
-
-	/**
-	 * @param string $id
-	 * @return SettingCategoryModel
-	 */
-	public function setId(string $id): SettingCategoryModel
-	{
-		$this->id = $id;
-		return $this;
-	}
-
-	/**
-	 * @return string
-	 */
 	public function getName(): string
 	{
 		return $this->name;
@@ -88,6 +70,13 @@ class SettingCategoryModel extends BaseModel2
 		return $this;
 	}
 
+	public function toMap(): array
+	{
+		$map = parent::toMap();
+		$map["settings"] = $this->getSettings();
+		return $map;
+	}
+
 	/**
 	 * @return SettingModel[]
 	 */
@@ -108,11 +97,22 @@ class SettingCategoryModel extends BaseModel2
 		return $this->settings;
 	}
 
-	public function toMap(): array
+	/**
+	 * @return string
+	 */
+	public function getId(): string
 	{
-		$map = parent::toMap();
-		$map["settings"] = $this->getSettings();
-		return $map;
+		return $this->id;
+	}
+
+	/**
+	 * @param string $id
+	 * @return SettingCategoryModel
+	 */
+	public function setId(string $id): SettingCategoryModel
+	{
+		$this->id = $id;
+		return $this;
 	}
 
 	/**

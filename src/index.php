@@ -12,5 +12,6 @@ define("HEFANG_CMS_ROOT", __DIR__);
 define("HEFANG_CMS_PLUGINS", HEFANG_CMS_ROOT . DS . "plugins");
 define("HEFANG_CMS_EVENT_INIT", "init");
 define("HEFANG_CMS_EVENT_REQUEST", "request");
+define("HEFANG_CMS_EVENT_EXCEPTION", "exception");
 
 startMvcApplication();

@@ -1,7 +1,7 @@
 {
 	"$schema": "https://hefang.link/schema/hefang-cms/plugin.schema.json",
 	"id": "hefang-cms-inner-plugin-rss",
-	"name": "何方博客",
+	"name": "RSS服务",
 	"version": "1.0.0",
 	"supportVersion": "*",
 	"author": {
@@ -14,7 +14,7 @@
 		"可配置",
 		"RSS"
 	],
-	"description": "何方博客",
+	"description": "RSS服务插件， 给CMS提供RSS订阅功能，也做为插件示例",
 	"className": "RssPlugin",
 	"namespace": "link.hefang.cms.plugins.rss",
 	"scripts": {

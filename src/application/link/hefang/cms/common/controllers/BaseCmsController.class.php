@@ -16,11 +16,6 @@ use Throwable;
 
 abstract class BaseCmsController extends BaseController implements SGLD
 {
-	protected function modelClass(): string
-	{
-		return "";
-	}
-
 	/**
 	 * 获取查询条件
 	 * @return string
@@ -50,20 +45,6 @@ abstract class BaseCmsController extends BaseController implements SGLD
 	}
 
 	/**
-	 * 获取用户登录信息, 若没有用户登录直接响应登录信息到客户端
-	 * @param string $message
-	 * @return AccountModel
-	 */
-	public function _checkLogin(string $message = "您未登录或已掉线, 请先登录"): AccountModel
-	{
-		$login = $this->_getLogin();
-		if (!($login instanceof AccountModel)) {
-			$this->_restApiUnauthorized($message)->compile()->render();
-		}
-		return $login;
-	}
-
-	/**
 	 * 检查当前用户是否已锁屏, 如果没有登录或已锁屏, 直接响应错误信息到客户端
 	 * @param string $message
 	 * @return AccountModel
@@ -73,6 +54,20 @@ abstract class BaseCmsController extends BaseController implements SGLD
 		$login = $this->_checkLogin();
 		if ($login->isLockedScreen()) {
 			$this->_restApiLocked($message)->compile()->render();
+		}
+		return $login;
+	}
+
+	/**
+	 * 获取用户登录信息, 若没有用户登录直接响应登录信息到客户端
+	 * @param string $message
+	 * @return AccountModel
+	 */
+	public function _checkLogin(string $message = "您未登录或已掉线, 请先登录"): AccountModel
+	{
+		$login = $this->_getLogin();
+		if (!($login instanceof AccountModel)) {
+			$this->_restApiUnauthorized($message)->compile()->render();
 		}
 		return $login;
 	}
@@ -171,5 +166,10 @@ abstract class BaseCmsController extends BaseController implements SGLD
 		} catch (Throwable $e) {
 			return $this->_restApiServerError($e);
 		}
+	}
+
+	protected function modelClass(): string
+	{
+		return "";
 	}
 }

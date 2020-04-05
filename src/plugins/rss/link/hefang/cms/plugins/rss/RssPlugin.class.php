@@ -22,7 +22,8 @@ class RssPlugin
 	{
 		$path = $event->getData();
 		if (StringHelper::startsWith($path, true, self::PREFIX_RSS)) {
-			$event->setData(new Router(null, "rss", "server"));
+			$arr = explode("/", $path);
+			$event->setData(new Router(null, "rss", $arr[2], isset($arr[3]) ? $arr[3] : null));
 			return false;
 		}
 		return true;

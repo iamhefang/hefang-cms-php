@@ -15,6 +15,7 @@ use link\hefang\mvc\Mvc;
 class AccountModel extends BaseModel2
 {
 	const ACCOUNT_SESSION_KEY = "ACCOUNT_SESSION";
+	const MAX_UNLOCK_TRY = 5;
 	private $id = "";
 	private $roleId = "";
 	private $name = "";
@@ -27,32 +28,11 @@ class AccountModel extends BaseModel2
 	private $avatar = null;
 	private $enable = true;
 	private $screenLockPassword = null;
-
-	/**
-	 * @return null|string
-	 */
-	public function getScreenLockPassword()
-	{
-		return $this->screenLockPassword;
-	}
-
-	/**
-	 * @param null|string $screenLockPassword
-	 * @return AccountModel
-	 */
-	public function setScreenLockPassword($screenLockPassword): AccountModel
-	{
-		$this->screenLockPassword = $screenLockPassword;
-		return $this;
-	}
-
 	private $loginTime = null;
 	private $loginIp = null;
 	private $token = null;
 	private $isLockedScreen = false;
 	private $unLockTries = 0;
-
-	const MAX_UNLOCK_TRY = 5;
 
 	/**
 	 * 返回模型和数据库对应的字段
@@ -76,6 +56,24 @@ class AccountModel extends BaseModel2
 			MF::prop("enable")->type(MF::TYPE_BOOL),
 			MF::prop("screenLockPassword")->hide()
 		];
+	}
+
+	/**
+	 * @return null|string
+	 */
+	public function getScreenLockPassword()
+	{
+		return $this->screenLockPassword;
+	}
+
+	/**
+	 * @param null|string $screenLockPassword
+	 * @return AccountModel
+	 */
+	public function setScreenLockPassword($screenLockPassword): AccountModel
+	{
+		$this->screenLockPassword = $screenLockPassword;
+		return $this;
 	}
 
 	public function login(BaseController $controller)

@@ -19,11 +19,6 @@ use link\hefang\mvc\views\BaseView;
 
 class MenuController extends BaseCmsController
 {
-	protected function modelClass(): string
-	{
-		return MenuModel::class;
-	}
-
 	public function list(string $cmd = null): BaseView
 	{
 		try {
@@ -139,5 +134,10 @@ class MenuController extends BaseCmsController
 		} catch (Exception $e) {
 			return $this->_restApiServerError($e);
 		}
+	}
+
+	protected function modelClass(): string
+	{
+		return MenuModel::class;
 	}
 }

@@ -6,8 +6,6 @@ namespace link\hefang\cms;
 use link\hefang\cms\admin\models\SettingModel;
 use link\hefang\cms\common\helpers\CacheHelper;
 use link\hefang\cms\content\models\ArticleModel;
-use link\hefang\cms\core\plugin\entities\PluginEntry;
-use link\hefang\cms\core\plugin\helpers\PluginHelper;
 use link\hefang\cms\core\plugin\PluginManager;
 use link\hefang\helpers\ClassHelper;
 use link\hefang\helpers\CollectionHelper;
@@ -46,6 +44,16 @@ class HeFangCMS extends SimpleApplication
 		}
 	}
 
+	public static function queryKey(): string
+	{
+		return Mvc::getProperty("project.query.field.name", "query");
+	}
+
+	public static function sortKey(): string
+	{
+		return Mvc::getProperty("project.sort.field.name", "sort");
+	}
+
 	public function onInit()
 	{
 		$settings = SettingModel::allValues();
@@ -55,13 +63,17 @@ class HeFangCMS extends SimpleApplication
 		return $event->getData();
 	}
 
-
 	/**
 	 * @param Throwable $e
 	 * @return BaseView|null
 	 */
 	public function onException(Throwable $e)
 	{
+		$event = PluginManager::executeHooks(HEFANG_CMS_EVENT_EXCEPTION, $e);
+		$data = $event->getData();
+		if ($data instanceof BaseView) {
+			return $data;
+		}
 		if ($e instanceof MethodNotAllowException) {
 			if ($e->getRouter()->getFormat() === "json") {
 				return new StatusView(new StatusResult(
@@ -69,7 +81,6 @@ class HeFangCMS extends SimpleApplication
 				));
 			}
 		}
-		print_r(get_declared_classes());
 		return null;
 	}
 
@@ -79,9 +90,6 @@ class HeFangCMS extends SimpleApplication
 		$event = PluginManager::executeHooks(HEFANG_CMS_EVENT_REQUEST, $path);
 		$router = $event->getData();
 		if ($router instanceof Router) {
-			/**
-			 * @var PluginEntry
-			 */
 			$pluginEntry = CollectionHelper::last($event->getPluginPath());
 			return $router->setModule("plugin-{$pluginEntry->getId()}");
 		}
@@ -110,15 +118,5 @@ class HeFangCMS extends SimpleApplication
 			}
 		}
 		return parent::onRequest($path);
-	}
-
-	public static function queryKey(): string
-	{
-		return Mvc::getProperty("project.query.field.name", "query");
-	}
-
-	public static function sortKey(): string
-	{
-		return Mvc::getProperty("project.sort.field.name", "sort");
 	}
 }

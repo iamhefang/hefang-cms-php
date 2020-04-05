@@ -93,22 +93,11 @@ class ContentTagModel extends BaseModel2
 		return $this;
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getTag(): string
+	public function toMap(): array
 	{
-		return $this->tag;
-	}
-
-	/**
-	 * @param string $tag
-	 * @return ContentTagModel
-	 */
-	public function setTag(string $tag): ContentTagModel
-	{
-		$this->tag = $tag;
-		return $this;
+		$map = parent::toMap();
+		$map["contentCount"] = $this->getContentCount();
+		return $map;
 	}
 
 	/**
@@ -129,10 +118,21 @@ class ContentTagModel extends BaseModel2
 		return $this->contentCount;
 	}
 
-	public function toMap(): array
+	/**
+	 * @return string
+	 */
+	public function getTag(): string
 	{
-		$map = parent::toMap();
-		$map["contentCount"] = $this->getContentCount();
-		return $map;
+		return $this->tag;
+	}
+
+	/**
+	 * @param string $tag
+	 * @return ContentTagModel
+	 */
+	public function setTag(string $tag): ContentTagModel
+	{
+		$this->tag = $tag;
+		return $this;
 	}
 }
