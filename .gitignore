@@ -40,3 +40,5 @@ node_modules/
 /src/themes/hefangblog/
 
 plugin-enabled
+
+test-theme/

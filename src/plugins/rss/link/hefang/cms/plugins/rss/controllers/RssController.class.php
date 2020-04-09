@@ -5,9 +5,9 @@ namespace link\hefang\cms\plugins\rss\controllers;
 
 
 use DOMDocument;
-use link\hefang\cms\common\controllers\BaseCmsController;
-use link\hefang\cms\common\helpers\CacheHelper;
-use link\hefang\cms\content\models\ArticleModel;
+use link\hefang\cms\application\content\models\ArticleModel;
+use link\hefang\cms\core\controllers\BaseCmsController;
+use link\hefang\cms\core\helpers\CacheHelper;
 use link\hefang\mvc\databases\Sql;
 use link\hefang\mvc\databases\SqlSort;
 use link\hefang\mvc\Mvc;

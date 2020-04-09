@@ -3,20 +3,23 @@
 
 namespace link\hefang\cms;
 
-use link\hefang\cms\admin\models\SettingModel;
-use link\hefang\cms\common\helpers\CacheHelper;
-use link\hefang\cms\content\models\ArticleModel;
+use link\hefang\cms\application\admin\models\SettingModel;
+use link\hefang\cms\application\content\models\ArticleModel;
+use link\hefang\cms\core\helpers\CacheHelper;
 use link\hefang\cms\core\plugin\PluginManager;
 use link\hefang\helpers\ClassHelper;
 use link\hefang\helpers\CollectionHelper;
 use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\entities\Router;
-use link\hefang\mvc\entities\StatusResult;
+use link\hefang\mvc\exceptions\ActionNotFoundException;
+use link\hefang\mvc\exceptions\ControllerNotFoundException;
 use link\hefang\mvc\exceptions\MethodNotAllowException;
 use link\hefang\mvc\helpers\DebugHelper;
 use link\hefang\mvc\Mvc;
+use link\hefang\mvc\results\StatusResult;
 use link\hefang\mvc\SimpleApplication;
 use link\hefang\mvc\views\BaseView;
+use link\hefang\mvc\views\ErrorView;
 use link\hefang\mvc\views\StatusView;
 use Throwable;
 
@@ -80,6 +83,9 @@ class HeFangCMS extends SimpleApplication
 					405, StatusView::HTTP_STATUS_CODE[405], $e->getMessage()
 				));
 			}
+		}
+		if ($e instanceof ControllerNotFoundException || $e instanceof ActionNotFoundException) {
+			return new ErrorView(404, "Not Found");
 		}
 		return null;
 	}

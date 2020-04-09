@@ -24,7 +24,7 @@ return [
 			]
 		]
 	],
-	'project.package' => "link.hefang.cms",
+	'project.package' => "link.hefang.cms.application",
 	'project.application.class' => 'link.hefang.cms.HeFangCMS',
 	//项目搜索字段名
 	'project.query.field.name' => 'query',

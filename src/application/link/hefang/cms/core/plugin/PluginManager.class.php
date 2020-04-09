@@ -4,7 +4,7 @@
 namespace link\hefang\cms\core\plugin;
 
 
-use link\hefang\cms\common\helpers\CacheHelper;
+use link\hefang\cms\core\helpers\CacheHelper;
 use link\hefang\cms\core\plugin\entities\PluginEntry;
 use link\hefang\cms\core\plugin\events\PluginEvent;
 use link\hefang\helpers\CollectionHelper;

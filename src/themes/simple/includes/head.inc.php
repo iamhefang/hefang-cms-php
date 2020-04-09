@@ -6,6 +6,6 @@
 <meta name="description" content="{:description}">
 <meta name="author" content="{:author}">
 <title>{:title}</title>
-<script src="{:themeUrl}/scripts/jquery-3.4.1.min.js"></script>
-<link rel="stylesheet" href="{:themeUrl}/styles/index.css">
-<script src="{:themeUrl}/scripts/index.js" defer></script>
+<script src="{config[themeUrl]}/scripts/jquery-3.4.1.min.js"></script>
+<link rel="stylesheet" href="{config[themeUrl]}/styles/index.css">
+<script src="{config[themeUrl]}/scripts/index.js" defer></script>

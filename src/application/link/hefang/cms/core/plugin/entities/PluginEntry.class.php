@@ -4,11 +4,13 @@
 namespace link\hefang\cms\core\plugin\entities;
 
 
+use JsonSerializable;
 use link\hefang\helpers\CollectionHelper;
 use link\hefang\helpers\StringHelper;
+use link\hefang\interfaces\IJsonObject;
 use link\hefang\interfaces\IMapObject;
 
-class PluginEntry implements IMapObject
+class PluginEntry implements IMapObject, IJsonObject, JsonSerializable
 {
 	private $id = "";
 	private $name = "";
@@ -27,6 +29,7 @@ class PluginEntry implements IMapObject
 	private $issues = "";
 	private $author = [];
 	private $settings = [];
+	private $status = "";
 
 	private $enable = false;
 
@@ -37,7 +40,13 @@ class PluginEntry implements IMapObject
 		isset($data["id"]) and $this->id = $data["id"];
 		isset($data["name"]) and $this->name = $data["name"];
 		isset($data["version"]) and $this->version = $data["version"];
-		isset($data["supportVersion"]) and $this->supportVersion = $data["supportVersion"];
+		if (isset($data["supportVersion"])) {
+			if (!is_array($data["supportVersion"])) {
+				$this->supportVersion = [$data["supportVersion"]];
+			} else {
+				$this->supportVersion = $data["supportVersion"];
+			}
+		}
 		isset($data["dependsOn"]) and $this->dependsOn = $data["dependsOn"];
 		isset($data["hooks"]) and $this->hooks = $data["hooks"];
 		isset($data["scripts"]) and $this->scripts = $data["scripts"];
@@ -59,7 +68,7 @@ class PluginEntry implements IMapObject
 				return str_replace(".", "\\", $name);
 			}, $data["controllers"]);
 		}
-		$this->setPluginDir($data["pluginDir"]);
+		isset($data["pluginDir"]) and $this->setPluginDir($data["pluginDir"]);
 	}
 
 	/**
@@ -410,5 +419,38 @@ class PluginEntry implements IMapObject
 			"settings" => $this->settings,
 			"enable" => $this->enable
 		];
+	}
+
+	public function toJsonString(): string
+	{
+		return json_encode($this->toMap(), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+	}
+
+	/**
+	 * Specify data which should be serialized to JSON
+	 * @link https://php.net/manual/en/jsonserializable.jsonserialize.php
+	 * @return mixed data which can be serialized by <b>json_encode</b>,
+	 * which is a value of any type other than a resource.
+	 * @since 5.4.0
+	 */
+	public function jsonSerialize()
+	{
+		return $this->toMap();
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getStatus(): string
+	{
+		return $this->status;
+	}
+
+	/**
+	 * @param string $status
+	 */
+	public function setStatus(string $status): void
+	{
+		$this->status = $status;
 	}
 }

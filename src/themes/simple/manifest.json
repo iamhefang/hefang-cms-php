@@ -23,19 +23,5 @@
 	"publicFiles": [
 		"/scripts/",
 		"/styles/"
-	],
-	"settings": [
-		{
-			"name": "固定导航栏",
-			"key": "fixedHeader",
-			"type": "boolean",
-			"default": true
-		},
-		{
-			"name": "显示轮播图",
-			"key": "showBanner",
-			"type": "boolean",
-			"default": true
-		}
 	]
 }
