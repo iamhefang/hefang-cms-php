@@ -8,6 +8,7 @@ use link\hefang\cms\core\controllers\BaseCmsController;
 use link\hefang\cms\core\helpers\CacheHelper;
 use link\hefang\helpers\CollectionHelper;
 use link\hefang\helpers\StringHelper;
+use link\hefang\helpers\TimeHelper;
 use link\hefang\mvc\databases\Sql;
 use link\hefang\mvc\databases\SqlSort;
 use link\hefang\mvc\Mvc;
@@ -16,52 +17,6 @@ use Throwable;
 
 class HomeController extends BaseCmsController
 {
-//	public function transfer(): BaseView
-//	{
-//		try {
-//			$pager = ArticleCopy1Model::pager(1, 1000);
-//			/**
-//			 * @var ArticleCopy1Model[]
-//			 */
-//			$data = $pager->getData();
-//			$count = 0;
-//			foreach ($data as $item) {
-//				if (!($item instanceof ArticleCopy1Model)) continue;
-//				try {
-//					$count += (new ArticleModel())
-//						->setId($item->getId())
-//						->setTitle($item->getTitle())
-//						->setPath("/article/{$item->getAlias()}.html")
-//						->setKeywords($item->getKeywords())
-//						->setDescription($item->getDescription())
-//						->setContent($item->getHtml())
-//						->setPostTime($item->getPostTime())
-//						->setLastAlterTime($item->getLastAlterTime())
-//						->setAuthorId($item->getAuthorId())
-//						->setReadCount($item->getReadCount())
-//						->setApprovalCount($item->getUpCount())
-//						->setOpposeCount(0)
-//						->setIsDraft($item->isDraft())
-//						->setCategoryId($item->getCateId())
-//						->setEnable($item->isEnable())
-//						->setType($item->getType())
-//						->setExtra(json_encode([
-//							"markdown" => $item->getMarkdown(),
-//							"reprint" => $item->getReprintFrom(),
-//							"covers" => $item->getCovers()
-//						], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))
-//						->insert() ? 1 : 0;
-//				} catch (Throwable $e) {
-//					Mvc::getLogger()->error($e->getMessage(), $item->getTitle(), $e);
-//				}
-//			}
-//			return $this->_text($count);
-//		} catch (Throwable $e) {
-//			return $this->_restApiServerError($e);
-//		}
-//
-//	}
-
 	/**
 	 * 首页
 	 * @return BaseView
@@ -147,8 +102,13 @@ class HomeController extends BaseCmsController
 				$this->_pageIndex(),
 				$this->_pageSize(),
 				new Sql(
-					"(is_draft = FALSE AND enable = TRUE AND `type`='article') AND (`title` LIKE :search OR `keywords` LIKE :search OR `description` LIKE :search OR `content` LIKE :search)",
-					["search" => "%$keywords%"]
+					"(is_draft = FALSE AND enable = TRUE AND `type`='article') AND (`title` LIKE :search1 OR `keywords` LIKE :search2 OR `description` LIKE :search3 OR `content` LIKE :search4)",
+					[
+						"search1" => "$keywords",
+						"search2" => "$keywords%",
+						"search3" => "%$keywords",
+						"search4" => "%$keywords%"
+					]
 				), [new SqlSort("readCount")]
 			);
 			return $this->_template($this->makeTplData([
@@ -165,16 +125,22 @@ class HomeController extends BaseCmsController
 
 	public function tags(string $tag): BaseView
 	{
-		$tablePrefix = Mvc::getTablePrefix();
 		try {
-			$pager = ArticleModel::pager(
-				$this->_pageIndex(),
-				$this->_pageSize(),
-				new Sql(
-					"(is_draft = FALSE AND enable = TRUE AND `type`='article') AND (`id` IN (SELECT `content_id` FROM `{$tablePrefix}content_tag` WHERE tag=:tag))",
-					["tag" => $tag]
-				), [new SqlSort("readCount")]
-			);
+
+			$pageIndex = $this->_pageIndex();
+			$pageSize = $this->_pageSize();
+			$pager = CacheHelper::cacheOrFetch(
+				"tag-articles-$tag-$pageIndex-$pageSize",
+				function () use ($tag, $pageIndex, $pageSize) {
+					$tablePrefix = Mvc::getTablePrefix();
+					return ArticleModel::pager(
+						$pageIndex, $pageSize,
+						new Sql(
+							"(is_draft = FALSE AND enable = TRUE AND `type`='article') AND (`id` IN (SELECT `content_id` FROM `{$tablePrefix}content_tag` WHERE tag=:tag))",
+							["tag" => $tag]
+						), [new SqlSort("readCount")]
+					);
+				}, TimeHelper::millisOfDays(7));
 			return $this->_template($this->makeTplData([
 				"pager" => $pager,
 				"message" => "标签：{$tag}",

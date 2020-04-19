@@ -27,11 +27,10 @@ class SettingController extends BaseCmsController
 	 */
 	public function list(string $cmd = null): BaseView
 	{
-		$category = $this->_request("category");
-//		$search = $this->_request(HeFangCMS::queryKey());
+		$category = $this->_request("category", $cmd);
 		$where = "enable = TRUE AND show_in_center = TRUE";
 		if (!StringHelper::isNullOrBlank($category)) {
-			$where .= "category = '{$category}'";
+			$where .= " AND category = '{$category}'";
 		}
 		try {
 			$pager = SettingModel::pager(

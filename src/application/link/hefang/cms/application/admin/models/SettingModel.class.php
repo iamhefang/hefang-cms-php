@@ -4,6 +4,7 @@
 namespace link\hefang\cms\application\admin\models;
 
 
+use link\hefang\cms\application\plugin\models\PluginModel;
 use link\hefang\cms\core\helpers\CacheHelper;
 use link\hefang\helpers\ParseHelper;
 use link\hefang\mvc\databases\Sql;
@@ -14,8 +15,6 @@ use link\hefang\mvc\Mvc;
 
 class SettingModel extends BaseModel2
 {
-	const CACHE_KEY_ALL_SETTINGS = "all-settings";
-
 	private $category = "";
 	private $key = "";
 	private $name = "";
@@ -27,6 +26,58 @@ class SettingModel extends BaseModel2
 	private $showInCenter = true;
 	private $sort = 0;
 	private $enable = true;
+
+	/**
+	 * @param PluginModel $model
+	 * @return int
+	 * @throws SqlException
+	 */
+	public static function initPluginSettings(PluginModel $model): int
+	{
+		$settings = $model->getSettingDefines();
+		$sqls = [];
+		$table = Mvc::getTablePrefix() . self::table();
+		$idx = 0;
+		foreach ($settings as $setting) {
+			$sqls[] = new Sql(
+				"INSERT INTO `{$table}`(
+					`category`,
+					`key`,
+					`name`,
+					`value`,
+					`type`,
+					`description`,
+					`attribute`,
+					`nullable`,
+					`enable`,
+					`sort`,
+					`show_in_center`
+				) VALUES (
+					'plugin_{$model->getId()}',
+					:key,
+					:name,
+					:value,
+					:type,
+					:description,
+					:attribute,
+					true,
+					true,
+					:sort,
+					false
+				)",
+				[
+					"key" => $setting["key"],
+					"name" => $setting["name"],
+					"value" => $setting["default"],
+					"type" => $setting["type"],
+					"sort" => $idx++,
+					"attribute" => $setting["attributes"],
+					"description" => $setting["description"]
+				]
+			);
+		}
+		return self::database()->transaction($sqls);
+	}
 
 	/**
 	 * @param bool $useCache
@@ -55,9 +106,9 @@ class SettingModel extends BaseModel2
 	 */
 	public static function allModels(bool $useCache = true): array
 	{
-		return CacheHelper::cacheOrFetch(self::CACHE_KEY_ALL_SETTINGS, function () {
+		return CacheHelper::cacheOrFetch(CacheHelper::KEY_ALL_SETTINGS, function () {
 			$data = SettingModel::pager(1, 1000, "enable = TRUE")->getData();
-			Mvc::getCache()->set(self::CACHE_KEY_ALL_SETTINGS, $data);
+			Mvc::getCache()->set(CacheHelper::KEY_ALL_SETTINGS, $data);
 			return $data;
 		}, -1, $useCache);
 	}
@@ -104,7 +155,7 @@ class SettingModel extends BaseModel2
 	public function getValue()
 	{
 		switch ($this->getType()) {
-			case "bool":
+			case "switch":
 				return ParseHelper::parseBoolean($this->value);
 			case "int":
 				return intval($this->value);
@@ -191,6 +242,7 @@ class SettingModel extends BaseModel2
 		}
 		$res = self::database()->transaction($sqls);
 		if ($updateCache && $res > 0) {
+			Mvc::getCache()->remove(CacheHelper::KEY_ALL_THEMES);
 			Mvc::putConfig(self::allValues(false));
 		}
 		return $res;
@@ -318,5 +370,12 @@ class SettingModel extends BaseModel2
 	public function setShowInCenter(bool $showInCenter): void
 	{
 		$this->showInCenter = $showInCenter;
+	}
+
+	public function toMap(): array
+	{
+		$map = parent::toMap();
+		$map['value'] = $this->getValue();
+		return $map;
 	}
 }

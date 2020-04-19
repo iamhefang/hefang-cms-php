@@ -8,6 +8,11 @@ use link\hefang\mvc\Mvc;
 
 class CacheHelper
 {
+	const KEY_ALL_PLUGINS = "all-plugins";
+	const KEY_ALL_MENUS = "all-menus";
+	const KEY_ALL_THEMES = "all-themes";
+	const KEY_ALL_SETTINGS = "all-settings";
+
 	/**
 	 * 从缓存取数据，如果缓存中没有数据，调用回调函数读取数据并存入缓存
 	 * @param string $name 缓存名

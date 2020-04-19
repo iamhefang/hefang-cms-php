@@ -10,6 +10,7 @@ use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\interfaces\SGLD;
 use link\hefang\mvc\Mvc;
 use link\hefang\mvc\views\BaseView;
+use Throwable;
 
 abstract class BaseCmsController extends BaseController implements SGLD
 {
@@ -76,17 +77,34 @@ abstract class BaseCmsController extends BaseController implements SGLD
 	public function _getLogin()
 	{
 		$authType = strtoupper(Mvc::getProperty("project.auth.type", "SESSION"));
+		$user = null;
+		$token = "";
 		if ($authType === "SESSION") {
-			return $this->_session(AccountModel::ACCOUNT_SESSION_KEY);
-		}
-
-		if ($authType === "TOKEN") {
+			$user = $this->_session(AccountModel::ACCOUNT_SESSION_KEY);
+			$token = session_id();
+		} elseif ($authType === "TOKEN") {
 			$token = $this->_header("Authorization");
 			if (!StringHelper::isNullOrBlank($token)) {
-				return Mvc::getCache()->get($token);
+				$user = Mvc::getCache()->get($token);
 			}
 		}
-		return null;
+
+		if (Mvc::isDebug()) {
+			$debugSuperUser = Mvc::getProperty("debug.token.superAdmin");
+			$debugAdminUser = Mvc::getProperty("debug.token.admin");
+			$debugNormalUser = Mvc::getProperty("debug.token.normal");
+			if (!StringHelper::isNullOrBlank($debugSuperUser) && $token === $debugSuperUser) {
+				return AccountModel::debugSuperUser();
+			}
+			if (!StringHelper::isNullOrBlank($debugAdminUser) && $token === $debugAdminUser) {
+				return AccountModel::debugAdminUser();
+			}
+			if (!StringHelper::isNullOrBlank($debugNormalUser) && $token === $debugNormalUser) {
+				return AccountModel::debugUser();
+			}
+		}
+
+		return $user;
 	}
 
 	/**

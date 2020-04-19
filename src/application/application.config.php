@@ -2,11 +2,10 @@
 
 defined('PHP_MVC') or die('Access Refused');
 
-/**
- * 默认配置项, 如果项目配置项里面缺少值会使用该值
- */
 return [
 	'debug.enable' => true,
+	'debug.token.superAdmin' => 'rootrootrootrootrootrootroot',
+	'debug.token.admin' => 'adminadminadminadminadminadmin',
 	'pathinfo.type' => 'PATH_INFO',
 	'project.router' => [
 		'/' => [

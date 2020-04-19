@@ -5,11 +5,14 @@ namespace link\hefang\cms;
 
 use link\hefang\cms\application\admin\models\SettingModel;
 use link\hefang\cms\application\content\models\ArticleModel;
+use link\hefang\cms\application\plugin\models\PluginModel;
 use link\hefang\cms\core\helpers\CacheHelper;
 use link\hefang\cms\core\plugin\PluginManager;
 use link\hefang\helpers\ClassHelper;
 use link\hefang\helpers\CollectionHelper;
 use link\hefang\helpers\StringHelper;
+use link\hefang\helpers\TimeHelper;
+use link\hefang\mvc\databases\Sql;
 use link\hefang\mvc\entities\Router;
 use link\hefang\mvc\exceptions\ActionNotFoundException;
 use link\hefang\mvc\exceptions\ControllerNotFoundException;
@@ -28,21 +31,23 @@ class HeFangCMS extends SimpleApplication
 	const PREFIX_APIS = "/apis/";
 	const PREFIX_TAGS = "/tags/";
 	const PREFIX_CATEGORY = "/category/";
+	const PREFIX_FILES = "/files/";
 	const PATH_SEARCH = "/search.html";
 
 
 	public function __construct()
 	{
-		$plugins = PluginManager::listPlugins();
-		foreach ($plugins as $pluginEntry) {
-			if (!$pluginEntry->isEnable()) continue;
-			DebugHelper::addPlugin($pluginEntry);
-			ClassHelper::loader($pluginEntry->getPluginDir());
-			if (!empty($pluginEntry->getControllers())) {
-				Mvc::addControllers($pluginEntry->getControllers(), "plugin-{$pluginEntry->getId()}");
+		$plugins = PluginModel::allPlugins();
+
+		foreach ($plugins as $plugin) {
+			if (!$plugin->isEnable()) continue;
+			DebugHelper::addPlugin($plugin);
+			ClassHelper::loader(HEFANG_CMS_PLUGINS . DS . $plugin->getId());
+			if (!empty($plugin->getControllers())) {
+				Mvc::addControllers($plugin->getControllers(), "plugin-{$plugin->getId()}");
 			}
-			$pluginClass = $pluginEntry->getClassName();
-			$manager = new PluginManager($pluginEntry);
+			$pluginClass = $plugin->getClassName();
+			$manager = new PluginManager($plugin);
 			new $pluginClass($manager);
 		}
 	}
@@ -114,11 +119,14 @@ class HeFangCMS extends SimpleApplication
 		if (strcasecmp($path, self::PATH_SEARCH) == 0) {
 			return new Router("main", "home", "search");
 		}
+		if (StringHelper::startsWith($path, true, self::PREFIX_FILES)) {
+			return new Router("main", "home", "article");
+		}
 		// /.html
 		if (strlen($path) > 6) {
 			$article = CacheHelper::cacheOrFetch($path, function () use ($path) {
-				return ArticleModel::find("`path` = '{$path}'");
-			});
+				return ArticleModel::find(new Sql("`path` = :path", ["path" => $path]));
+			}, TimeHelper::millisOfDays(7));
 			if ($article instanceof ArticleModel && $article->isExist() && $article->isEnable()) {
 				return new Router("main", "home", "article", $article->getId());
 			}

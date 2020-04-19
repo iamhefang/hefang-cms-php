@@ -14,6 +14,7 @@ use link\hefang\mvc\exceptions\ModelException;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\Mvc;
 use link\hefang\mvc\views\BaseView;
+use Throwable;
 
 class AccountController extends BaseCmsController
 {
@@ -62,8 +63,15 @@ class AccountController extends BaseCmsController
 			$isMatchLockPwd = $login->getScreenLockPassword() && HashHelper::passwordVerify($pwd, $login->getScreenLockPassword(), Mvc::getPasswordSalt());
 			if ($isMatchLockPwd
 				|| HashHelper::passwordVerify($pwd, $login->getPassword(), Mvc::getPasswordSalt())) {
-				$login->setUnLockTries(0)->setIsLockedScreen(false)->updateSession($this);
-				return $this->_restApiOk($login);
+				try {
+					$login->setUnLockTries(0)
+						->setIsLockedScreen(false)
+						->updateSession($this)
+						->update(["isLockedScreen"]);
+					return $this->_restApiOk($login);
+				} catch (Throwable $e) {
+					return $this->_restApiOk($login);
+				}
 			} else {
 				return $this->unlockFailed($login);
 			}
@@ -81,7 +89,7 @@ class AccountController extends BaseCmsController
 			->updateSession($this);
 
 		try {
-			$login->update(["screen_lock_password"]);
+			$login->update(["screenLockPassword", "isLockedScreen"]);
 		} catch (Exception $e) {
 		}
 
@@ -136,7 +144,7 @@ class AccountController extends BaseCmsController
 
 	public function logout(): BaseView
 	{
-		$login = $this->_checkLogin();
+		$login = $this->_getLogin();
 		if ($login instanceof AccountModel) {
 			$login->logout();
 		}

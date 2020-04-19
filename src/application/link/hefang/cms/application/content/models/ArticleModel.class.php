@@ -473,7 +473,7 @@ class ArticleModel extends BaseModel2
 		return $this->commentCount;
 	}
 
-	public function readCountPlus()
+	public function readCountPlus(): ArticleModel
 	{
 		$tablePrefix = Mvc::getTablePrefix();
 		try {
@@ -481,9 +481,16 @@ class ArticleModel extends BaseModel2
 				"UPDATE `{$tablePrefix}article` SET `read_count` = `read_count` + 1 WHERE `id` = :id",
 				["id" => $this->getId()]
 			));
-			$this->setReadCount($this->getReadCount() + 1);
-			Mvc::getCache()->set($this->getId(), $this);
+			$this->setReadCount($this->getReadCount() + 1)->updateCache();
 		} catch (SqlException $e) {
 		}
+		return $this;
+	}
+
+	public function updateCache(): ArticleModel
+	{
+		Mvc::getCache()->set($this->getId(), $this);
+		Mvc::getCache()->set($this->getPath(), $this);
+		return $this;
 	}
 }

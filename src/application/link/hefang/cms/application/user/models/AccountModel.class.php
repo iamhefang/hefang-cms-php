@@ -8,6 +8,7 @@ use link\hefang\helpers\RandomHelper;
 use link\hefang\helpers\StringHelper;
 use link\hefang\helpers\TimeHelper;
 use link\hefang\mvc\controllers\BaseController;
+use link\hefang\mvc\exceptions\ModelException;
 use link\hefang\mvc\models\BaseModel2;
 use link\hefang\mvc\models\ModelField as MF;
 use link\hefang\mvc\Mvc;
@@ -54,7 +55,8 @@ class AccountModel extends BaseModel2
 			MF::prop("locked")->type(MF::TYPE_BOOL),
 			MF::prop("lockedTime"),
 			MF::prop("enable")->type(MF::TYPE_BOOL),
-			MF::prop("screenLockPassword")->hide()
+			MF::prop("screenLockPassword")->hide(),
+			MF::prop("isLockedScreen")->type(MF::TYPE_BOOL)
 		];
 	}
 
@@ -396,4 +398,64 @@ class AccountModel extends BaseModel2
 		return $this;
 	}
 
+	public function insert(): bool
+	{
+		if ($this->isDebugUser()) {
+			throw new ModelException("当前用户是调试用的虚拟用户，不能保存到数据库");
+		}
+		return parent::insert();
+	}
+
+	public function update(array $fields2update = null): bool
+	{
+		if ($this->isDebugUser()) {
+			throw new ModelException("当前用户是调试用的虚拟用户， 不能更新到数据库");
+		}
+		return parent::update($fields2update);
+	}
+
+	/**
+	 * 是否是调试用的虚拟用户
+	 * @return bool
+	 */
+	public function isDebugUser(): bool
+	{
+		return $this->registerType === "debug";
+	}
+
+	public static function debugSuperUser(): AccountModel
+	{
+		$model = new AccountModel();
+		return $model
+			->setId("root")
+			->setName("调试超管")
+			->setRoleId("admin")
+			->setEnable(true)
+			->setRegisterType("debug")
+			->setRegisterTime(TimeHelper::formatMillis());
+	}
+
+	public static function debugAdminUser(): AccountModel
+	{
+		$model = new AccountModel();
+		return $model
+			->setId(RandomHelper::guid())
+			->setName("调试普管")
+			->setRoleId("admin")
+			->setEnable(true)
+			->setRegisterType("debug")
+			->setRegisterTime(TimeHelper::formatMillis());
+	}
+
+	public static function debugUser(): AccountModel
+	{
+		$model = new AccountModel();
+		return $model
+			->setId(RandomHelper::guid())
+			->setName("调试用户")
+			->setRoleId("normal")
+			->setEnable(true)
+			->setRegisterType("debug")
+			->setRegisterTime(TimeHelper::formatMillis());
+	}
 }

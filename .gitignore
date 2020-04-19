@@ -24,6 +24,8 @@
 /app/Config/database.php
 /vendors/*
 .idea/
+.vs/
+.vscode/
 /test/
 /tmp/
 /temp/

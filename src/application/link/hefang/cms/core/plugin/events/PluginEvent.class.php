@@ -4,7 +4,7 @@
 namespace link\hefang\cms\core\plugin\events;
 
 
-use link\hefang\cms\core\plugin\entities\PluginEntry;
+use link\hefang\cms\application\plugin\models\PluginModel;
 
 class PluginEvent
 {
@@ -43,16 +43,16 @@ class PluginEvent
 	}
 
 	/**
-	 * @return PluginEntry[]
+	 * @return PluginModel[]
 	 */
 	public function getPluginPath(): array
 	{
 		return array_merge([], $this->pluginPath);
 	}
 
-	public function addPluginPath(PluginEntry $entry): PluginEvent
+	public function addPluginPath(PluginModel $model): PluginEvent
 	{
-		$this->pluginPath[] = $entry;
+		$this->pluginPath[] = $model;
 		return $this;
 	}
 }

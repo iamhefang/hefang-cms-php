@@ -20,11 +20,12 @@
 	],
 	"target-dir": "src",
 	"require": {
-		"php": ">7.0.0",
-		"hefang/php-helpers": "1.0.0",
-		"hefang/php-mvc": "1.0.1",
+		"php": ">=7.0.0",
+		"hefang/php-helpers": "*",
+		"hefang/php-mvc": "*",
 		"ext-json": "*",
-		"ext-dom": "*"
+		"ext-dom": "*",
+		"ext-pdo": "*"
 	},
 	"repositories": {
 		"packagist": {

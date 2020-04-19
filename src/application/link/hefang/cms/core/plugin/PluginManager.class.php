@@ -4,46 +4,18 @@
 namespace link\hefang\cms\core\plugin;
 
 
-use link\hefang\cms\core\helpers\CacheHelper;
-use link\hefang\cms\core\plugin\entities\PluginEntry;
+use link\hefang\cms\application\plugin\models\PluginModel;
 use link\hefang\cms\core\plugin\events\PluginEvent;
 use link\hefang\helpers\CollectionHelper;
 
 class PluginManager
 {
 	private static $hooks = [];
-	private static $plugins = [];
 	private $plugin;
 
-	public function __construct(PluginEntry $plugin)
+	public function __construct(PluginModel $plugin)
 	{
 		$this->plugin = $plugin;
-	}
-
-	/**
-	 * @param bool $useCache
-	 * @return PluginEntry[]
-	 */
-	public static function listPlugins(bool $useCache = true): array
-	{
-		if (empty(self::$plugins)) {
-			self::$plugins = CacheHelper::cacheOrFetch(__FUNCTION__ . "plugins", function () {
-				$pluginDirs = scandir(HEFANG_CMS_PLUGINS);
-				$pluginArray = [];
-				foreach ($pluginDirs as $pluginDir) {
-					$pluginPath = HEFANG_CMS_PLUGINS . DS . $pluginDir;
-					$file = $pluginPath . DS . "manifest.json";
-					if ($pluginDir === "." || $pluginDir === ".." || !is_file($file)) continue;
-					$plugin = json_decode(file_get_contents($file), true);
-					$plugin["enable"] = file_exists($pluginPath . DS . "plugin-enabled");
-					unset($plugin["\$schema"]);
-					$plugin["pluginDir"] = $pluginPath;
-					$pluginArray[] = new PluginEntry($plugin);
-				}
-				return $pluginArray;
-			}, -1, $useCache);
-		}
-		return self::$plugins;
 	}
 
 	public static function executeHooks(string $eventName, $data): PluginEvent

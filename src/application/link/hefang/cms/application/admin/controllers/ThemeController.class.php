@@ -18,7 +18,7 @@ class ThemeController extends BaseCmsController
 		if (!$login->isAdmin()) {
 			return $this->_restApiForbidden();
 		}
-		$themes = CacheHelper::cacheOrFetch(__FUNCTION__ . "themes", function () {
+		$themes = CacheHelper::cacheOrFetch(CacheHelper::KEY_ALL_THEMES, function () {
 			$themeDirs = scandir(PATH_THEMES);
 			$themeArray = [];
 			foreach ($themeDirs as $themeDir) {
@@ -48,6 +48,7 @@ class ThemeController extends BaseCmsController
 			return $this->_restApiNotFound();
 		}
 		$res = FileHelper::delete($themeDir);
+		Mvc::getCache()->remove(CacheHelper::KEY_ALL_THEMES);
 		return $this->_restApiOk($res);
 	}
 }
