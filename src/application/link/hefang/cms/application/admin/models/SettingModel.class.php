@@ -9,11 +9,11 @@ use link\hefang\cms\core\helpers\CacheHelper;
 use link\hefang\helpers\ParseHelper;
 use link\hefang\mvc\databases\Sql;
 use link\hefang\mvc\exceptions\SqlException;
-use link\hefang\mvc\models\BaseModel2;
+use link\hefang\mvc\models\BaseModel;
 use link\hefang\mvc\models\ModelField as MF;
 use link\hefang\mvc\Mvc;
 
-class SettingModel extends BaseModel2
+class SettingModel extends BaseModel
 {
 	private $category = "";
 	private $key = "";
@@ -366,10 +366,12 @@ class SettingModel extends BaseModel2
 
 	/**
 	 * @param bool $showInCenter
+	 * @return SettingModel
 	 */
-	public function setShowInCenter(bool $showInCenter): void
+	public function setShowInCenter(bool $showInCenter): SettingModel
 	{
 		$this->showInCenter = $showInCenter;
+		return $this;
 	}
 
 	public function toMap(): array

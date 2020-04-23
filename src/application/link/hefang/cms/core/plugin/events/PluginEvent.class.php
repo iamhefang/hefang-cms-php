@@ -37,7 +37,7 @@ class PluginEvent
 	/**
 	 * @param null|mixed $data
 	 */
-	public function setData($data): void
+	public function setData($data)
 	{
 		$this->data = $data;
 	}

@@ -7,11 +7,11 @@ namespace link\hefang\cms\application\admin\models;
 use link\hefang\cms\core\helpers\CacheHelper;
 use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\databases\SqlSort;
-use link\hefang\mvc\models\BaseModel2;
+use link\hefang\mvc\models\BaseModel;
 use link\hefang\mvc\models\ModelField as MF;
 
 
-class MenuModel extends BaseModel2
+class MenuModel extends BaseModel
 {
 	const CACHE_KEY_ALL_MENUS = "all-menus";
 

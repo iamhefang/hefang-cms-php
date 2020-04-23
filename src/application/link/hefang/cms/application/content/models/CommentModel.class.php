@@ -4,10 +4,10 @@
 namespace link\hefang\cms\application\content\models;
 
 
-use link\hefang\mvc\models\BaseModel2;
+use link\hefang\mvc\models\BaseModel;
 use link\hefang\mvc\models\ModelField as MF;
 
-class CommentModel extends BaseModel2
+class CommentModel extends BaseModel
 {
 	private $id = "";
 	private $contentId = "";

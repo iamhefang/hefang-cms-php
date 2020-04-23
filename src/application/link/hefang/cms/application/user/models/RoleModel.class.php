@@ -7,10 +7,10 @@ namespace link\hefang\cms\application\user\models;
 use link\hefang\cms\application\admin\models\MenuModel;
 use link\hefang\mvc\databases\Sql;
 use link\hefang\mvc\exceptions\SqlException;
-use link\hefang\mvc\models\BaseModel2;
+use link\hefang\mvc\models\BaseModel;
 use link\hefang\mvc\Mvc;
 
-class RoleModel extends BaseModel2
+class RoleModel extends BaseModel
 {
 	private $id = "";
 	private $parentId = null;

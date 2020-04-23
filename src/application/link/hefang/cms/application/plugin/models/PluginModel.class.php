@@ -8,11 +8,11 @@ use link\hefang\cms\core\helpers\CacheHelper;
 use link\hefang\helpers\StringHelper;
 use link\hefang\helpers\TimeHelper;
 use link\hefang\mvc\exceptions\SqlException;
-use link\hefang\mvc\models\BaseModel2;
+use link\hefang\mvc\models\BaseModel;
 use link\hefang\mvc\models\ModelField;
 use link\hefang\mvc\Mvc;
 
-class PluginModel extends BaseModel2
+class PluginModel extends BaseModel
 {
 
 	//等待初始化

@@ -9,11 +9,11 @@ use link\hefang\helpers\StringHelper;
 use link\hefang\helpers\TimeHelper;
 use link\hefang\mvc\controllers\BaseController;
 use link\hefang\mvc\exceptions\ModelException;
-use link\hefang\mvc\models\BaseModel2;
+use link\hefang\mvc\models\BaseModel;
 use link\hefang\mvc\models\ModelField as MF;
 use link\hefang\mvc\Mvc;
 
-class AccountModel extends BaseModel2
+class AccountModel extends BaseModel
 {
 	const ACCOUNT_SESSION_KEY = "ACCOUNT_SESSION";
 	const MAX_UNLOCK_TRY = 5;

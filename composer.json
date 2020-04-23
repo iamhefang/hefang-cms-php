@@ -25,7 +25,9 @@
 		"hefang/php-mvc": "*",
 		"ext-json": "*",
 		"ext-dom": "*",
-		"ext-pdo": "*"
+		"ext-pdo": "*",
+		"ext-gd": "*",
+		"ext-mbstring": "*"
 	},
 	"repositories": {
 		"packagist": {

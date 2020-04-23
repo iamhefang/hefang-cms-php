@@ -5,11 +5,11 @@ namespace link\hefang\cms\application\admin\models;
 
 
 use link\hefang\mvc\databases\SqlSort;
-use link\hefang\mvc\models\BaseModel2;
+use link\hefang\mvc\models\BaseModel;
 use link\hefang\mvc\models\ModelField as MF;
 use Throwable;
 
-class SettingCategoryModel extends BaseModel2
+class SettingCategoryModel extends BaseModel
 {
 	private $id = "";
 	private $name = "";

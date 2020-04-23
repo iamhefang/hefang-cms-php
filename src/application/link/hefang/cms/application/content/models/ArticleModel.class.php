@@ -7,12 +7,12 @@ namespace link\hefang\cms\application\content\models;
 use link\hefang\cms\application\user\models\AccountModel;
 use link\hefang\mvc\databases\Sql;
 use link\hefang\mvc\exceptions\SqlException;
-use link\hefang\mvc\models\BaseModel2;
+use link\hefang\mvc\models\BaseModel;
 use link\hefang\mvc\models\ModelField as MF;
 use link\hefang\mvc\Mvc;
 use Throwable;
 
-class ArticleModel extends BaseModel2
+class ArticleModel extends BaseModel
 {
 	private $id = "";
 	private $title = "";

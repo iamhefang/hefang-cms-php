@@ -1,10 +1,21 @@
 <?php
 
-class_exists("\link\hefang\helpers\ClassHelper") or die("未找到库php-helpers");
-class_exists("\link\hefang\mvc\Mvc") or die("未找到库php-mvc");
-define("HEFANG_CMS", "VERSION");
+use link\hefang\helpers\ClassHelper;
+
+define("HEFANG_CMS", "!!VERSION!!");
 define("HEFANG_CMS_ROOT", __DIR__);
+defined("HEFANG_CMS_PLUGINS") or define("HEFANG_CMS_PLUGINS", $_SERVER["DOCUMENT_ROOT"] . DS . "plugins");
+define("HEFANG_CMS_EVENT_INIT", "init");
+define("HEFANG_CMS_EVENT_REQUEST", "request");
+define("HEFANG_CMS_EVENT_EXCEPTION", "exception");
 
-\link\hefang\helpers\ClassHelper::loader(__DIR__);
+ClassHelper::loader(HEFANG_CMS_ROOT);
 
-\link\hefang\mvc\Mvc::init();
+if (defined("APPLICATION_CONFIG_FILE")) {
+	$settings = include(APPLICATION_CONFIG_FILE);
+	startMvcApplication($settings);
+} else {
+	startMvcApplication();
+}
+
+

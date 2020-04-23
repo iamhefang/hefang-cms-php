@@ -6,10 +6,10 @@ namespace link\hefang\cms\application\content\models;
 
 use link\hefang\mvc\databases\Sql;
 use link\hefang\mvc\exceptions\SqlException;
-use link\hefang\mvc\models\BaseModel2;
+use link\hefang\mvc\models\BaseModel;
 use link\hefang\mvc\models\ModelField as MF;
 
-class FileModel extends BaseModel2
+class FileModel extends BaseModel
 {
 	private $id = "";
 	private $name;
