@@ -15,6 +15,7 @@ class CategoryModel extends BaseModel
 	private $description = "";
 	private $enable = true;
 	private $type = "article";
+	private $parentId;
 
 	/**
 	 * 返回模型和数据库对应的字段
@@ -29,6 +30,7 @@ class CategoryModel extends BaseModel
 			MF::prop("name")->trim(),
 			MF::prop("keywords")->trim(),
 			MF::prop("description")->trim(),
+			MF::prop("parentId")->trim(),
 			MF::prop("enable")->type(MF::TYPE_BOOL)
 		];
 	}
@@ -138,6 +140,24 @@ class CategoryModel extends BaseModel
 	public function setType(string $type): CategoryModel
 	{
 		$this->type = $type;
+		return $this;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getParentId()
+	{
+		return $this->parentId;
+	}
+
+	/**
+	 * @param string|null $parentId
+	 * @return CategoryModel
+	 */
+	public function setParentId($parentId): CategoryModel
+	{
+		$this->parentId = $parentId;
 		return $this;
 	}
 }

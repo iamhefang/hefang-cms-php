@@ -20,7 +20,7 @@
 
 ## query说明
 
-字段名=值&字段名!=值|字段名~=值|字段名>值|字段名<值|字段名>=值|字段名<=值  
+字段名=值&字段名!=值|字段名~=值|字段名>值|字段名<值|字段名>=值|字段名<=值
 
 1. `=`: 全等
 1. `!=`: 不等
@@ -32,3 +32,18 @@
 1. `&`: 且
 1. `|`: 或
 
+```rest
+/api/content/article/list.json?query=title~=debug&(postTime>=2020-06-06|keywords=debug)
+```
+```sql
+select * from article where title like '%debug%' and (post_time >= '2020-06-06' or keywords='debug')
+```
+
+
+## sort 说明
+```rest
+/api/content/article/list.json?sort=-read_count,+oppose_count&query=title~=debug&(postTime>=2020-06-06|keywords=debug)
+```
+```sql
+select * from article order by read_count desc, oppose_count asc
+```

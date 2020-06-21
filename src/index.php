@@ -1,11 +1,23 @@
 <?php
-//require "./libraries/php-helpers-latest.phar";
-//require "./libraries/php-mvc-latest.phar";
+require "./libraries/php-helpers-latest.phar";
+require "./libraries/php-mvc-latest.phar";
 
-require "C:\Users\hefang\DevDir\php-frameworks\php-helpers\src\php-helpers.php";
-require "C:\Users\hefang\DevDir\php-frameworks\php-mvc\src\php-mvc.php";
+use link\hefang\helpers\ClassHelper;
+
+define("HEFANG_CMS", "!!1.0.0!!");
+define("HEFANG_CMS_ROOT", __DIR__);
+defined("HEFANG_CMS_PLUGINS") or define("HEFANG_CMS_PLUGINS", $_SERVER["DOCUMENT_ROOT"] . DS . "plugins");
+define("HEFANG_CMS_EVENT_INIT", "init");
+define("HEFANG_CMS_EVENT_REQUEST", "request");
+define("HEFANG_CMS_EVENT_EXCEPTION", "exception");
+
+//ClassHelper::loader(HEFANG_CMS_ROOT);
+define('APPLICATION_CONFIG_FILE',realpath("./application.config.php"));
+if (defined("APPLICATION_CONFIG_FILE")) {
+	$settings = include(APPLICATION_CONFIG_FILE);
+	startMvcApplication($settings);
+} else {
+	startMvcApplication();
+}
 
 
-define("APPLICATION_CONFIG_FILE", __DIR__ . DS . "application.config.php");
-
-require "./application/hefang-cms.php";

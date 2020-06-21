@@ -22,11 +22,13 @@ class ArticleController extends BaseCmsController
 {
 	/**
 	 * 添加或更新数据
-	 * @method POST
-	 * @method PUT
-	 * @method PATCH
-	 * @param string|null $id
+	 * @method POST 添加文章， 添加文章时不传id参数
+	 * @method PUT 全字段修改文章
+	 * @method PATCH 修改文章某个字段
+	 * @param string|null $id 文章id
 	 * @return BaseView
+	 * @example /api/content/article/set/31IWAwcq5VY1t64I5eWNXow0vWFpi2sBSa83x0IR.json
+	 * @example /api/模块名/控制器名/动作/参数.格式
 	 */
 	public function set(string $id = null): BaseView
 	{
@@ -97,6 +99,7 @@ class ArticleController extends BaseCmsController
 	 * 获取一条数据
 	 * @method GET
 	 * @param string|null $id 要获取的数据的id
+	 * @example /api/content/article/get.json?id=文章id
 	 * @return BaseView
 	 */
 	public function get(string $id = null): BaseView

@@ -10,6 +10,7 @@ use link\hefang\cms\core\controllers\BaseCmsController;
 use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\views\BaseView;
+use Throwable;
 
 class SettingController extends BaseCmsController
 {
@@ -72,13 +73,30 @@ class SettingController extends BaseCmsController
 		}
 	}
 
+	/**
+	 * 修改或添加配置
+	 * @param string|null $id
+	 * @return BaseView
+	 */
 	public function set(string $id = null): BaseView
 	{
+		$method = $this->_method();
 		$data = $this->_post();
 		try {
-			$res = SettingModel::saveSettings($data);
+			if ($method === "POST") {
+				$model = new SettingModel();
+				foreach ($data as $key => $value) {
+					$model->setValue2Prop($value, $key);
+				}
+				$model->setCategory("custom");
+				$res = $model->insert() ? 1 : 0;
+			} else if ($method === "PUT") {
+				$res = SettingModel::saveSettings($data);
+			} else {
+				return $this->_restApiMethodNotAllowed();
+			}
 			return $res > 0 ? $this->_restApiOk() : $this->_restNotModified($res);
-		} catch (SqlException $e) {
+		} catch (Throwable $e) {
 			return $this->_restApiServerError($e);
 		}
 	}

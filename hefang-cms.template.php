@@ -1,4 +1,6 @@
 <?php
+require "./libraries/php-helpers-latest.phar";
+require "./libraries/php-mvc-latest.phar";
 
 use link\hefang\helpers\ClassHelper;
 

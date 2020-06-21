@@ -6,7 +6,6 @@ use link\hefang\cms\application\user\models\AccountModel;
 use link\hefang\cms\HeFangCMS;
 use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\controllers\BaseController;
-use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\interfaces\SGLD;
 use link\hefang\mvc\Mvc;
 use link\hefang\mvc\views\BaseView;
@@ -151,7 +150,6 @@ abstract class BaseCmsController extends BaseController implements SGLD
 	 * @method POST
 	 * @param string|null $cmd
 	 * @return BaseView
-	 * @throws SqlException
 	 */
 	public function delete(string $cmd = null): BaseView
 	{
