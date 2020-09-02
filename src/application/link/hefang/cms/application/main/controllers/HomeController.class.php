@@ -17,6 +17,14 @@ use Throwable;
 
 class HomeController extends BaseCmsController
 {
+	private $templateFunc;
+
+	public function __construct()
+	{
+		$this->templateFunc = join(DS, [HEFANG_CMS_ROOT, "link", "hefang", "cms", "core", "functions", "template.func.php"]);
+		include $this->templateFunc;
+	}
+
 	/**
 	 * 首页
 	 * @return BaseView
@@ -28,6 +36,20 @@ class HomeController extends BaseCmsController
 			"pageIndex" => $this->_pageIndex(),
 			"pageSize" => $this->_pageSize()
 		]), "index");
+	}
+
+	/**
+	 * 渲染器
+	 * @param string $template 要渲染的模板名
+	 * @return BaseView
+	 */
+	public function render(string $template): BaseView
+	{
+		return $this->_template($this->makeTplData([
+			"title" => "首页",
+			"pageIndex" => $this->_pageIndex(),
+			"pageSize" => $this->_pageSize()
+		]), $template);
 	}
 
 	private function makeTplData(array $data): array

@@ -5,6 +5,8 @@ namespace link\hefang\cms\application\content\models;
 
 
 use link\hefang\cms\application\user\models\AccountModel;
+use link\hefang\helpers\CollectionHelper;
+use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\databases\Sql;
 use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\models\BaseModel;
@@ -33,6 +35,8 @@ class ArticleModel extends BaseModel
 	private $extra = "";
 	private $type = "article";
 	private $tags = [];
+	private $covers = [];
+
 	private $categoryName = null;
 	private $authorName = null;
 	private $commentCount = null;
@@ -437,24 +441,33 @@ class ArticleModel extends BaseModel
 	}
 
 	/**
-	 * @return string|string
+	 * @param string|null $name
+	 * @param null $defValue
+	 * @return array|string|bool|integer|float|null
 	 */
-	public function getExtra()
+	public function getExtra(string $name = null, $defValue = null)
 	{
-		return $this->extra;
+		try {
+			$json = json_decode(StringHelper::isNullOrBlank($this->extra) ? "{}" : $this->extra, true);
+			return $name ? CollectionHelper::getOrDefault($json, $name, $defValue) : $json;
+		} catch (Throwable $e) {
+			Mvc::getLogger()->error($e->getMessage(), "解析文章附加属性时异常", $e);
+			return [];
+		}
 	}
 
 	/**
-	 * @param string|string $extra
+	 * @param string|array $extra
 	 * @return ArticleModel
 	 */
 	public function setExtra($extra): ArticleModel
 	{
-		$this->extra = $extra;
+		$this->extra = is_array($extra) ? json_encode($extra, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : $extra;
 		return $this;
 	}
 
 	/**
+	 * 获取评论数量
 	 * @return int
 	 */
 	public function getCommentCount(): int
@@ -473,6 +486,10 @@ class ArticleModel extends BaseModel
 		return $this->commentCount;
 	}
 
+	/**
+	 * 更新文章阅读量
+	 * @return $this
+	 */
 	public function readCountPlus(): ArticleModel
 	{
 		$tablePrefix = Mvc::getTablePrefix();
@@ -487,10 +504,39 @@ class ArticleModel extends BaseModel
 		return $this;
 	}
 
+	/**
+	 * 更新缓存
+	 * @return $this
+	 */
 	public function updateCache(): ArticleModel
 	{
 		Mvc::getCache()->set($this->getId(), $this);
 		Mvc::getCache()->set($this->getPath(), $this);
+		return $this;
+	}
+
+	/**
+	 * 获取封面
+	 * @return array|null
+	 */
+	public function getCovers()
+	{
+		try {
+			return $this->covers ? json_decode($this->covers, true) : null;
+		} catch (Throwable $e) {
+			Mvc::getLogger()->error($e->getMessage(), "文章封面解析失败", $e);
+			$this->covers = null;
+			return null;
+		}
+	}
+
+	/**
+	 * @param array $covers
+	 * @return ArticleModel
+	 */
+	public function setCovers(array $covers)
+	{
+		$this->covers = json_encode($covers, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 		return $this;
 	}
 }

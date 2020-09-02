@@ -7,6 +7,7 @@ namespace link\hefang\cms\application\admin\models;
 use link\hefang\cms\core\helpers\CacheHelper;
 use link\hefang\helpers\StringHelper;
 use link\hefang\mvc\databases\SqlSort;
+use link\hefang\mvc\exceptions\SqlException;
 use link\hefang\mvc\models\BaseModel;
 use link\hefang\mvc\models\ModelField as MF;
 
@@ -44,6 +45,7 @@ class MenuModel extends BaseModel
 	 * @param bool $useCache
 	 * @param bool $onlyEnable
 	 * @return array
+	 * @throws SqlException
 	 */
 	public static function all(bool $onlyEnable = false, bool $useCache = true): array
 	{
@@ -60,8 +62,10 @@ class MenuModel extends BaseModel
 						$item->children = $functions[$item->getId()]->children;
 					}
 					$functions[$item->getId()] = $item;
-				} else {
+				} else if (array_key_exists($item->getParentId(), $functions)) {
 					$functions[$item->getParentId()]->children[] = $item;
+				} else {
+					$functions[$item->getId()] = $item;
 				}
 			}
 			$all = array_values($functions);

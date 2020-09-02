@@ -46,3 +46,5 @@ plugin-enabled
 test-theme/
 
 hefang-cms.php
+!themes/simple/
+!themes/theme.schema.json

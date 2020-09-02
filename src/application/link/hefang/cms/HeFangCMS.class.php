@@ -130,6 +130,10 @@ class HeFangCMS extends SimpleApplication
 			if ($article instanceof ArticleModel && $article->isExist() && $article->isEnable()) {
 				return new Router("main", "home", "article", $article->getId());
 			}
+			$matches = [];
+			if (preg_match("/^\/([^.\/]+)\.html$/", $path, $matches)) {
+				return new Router("main", "home", "render", $matches[1]);
+			}
 		}
 		return parent::onRequest($path);
 	}

@@ -32,10 +32,10 @@ return [
 	'project.auth.type' => 'SESSION', //TOKEN, SESSION
 	'database.enable' => true,
 	'database.class' => 'link.hefang.mvc.databases.Mysql',
-	'database.host' => 'hefang.link',
+	'database.host' => 'localhost',
 	'database.port' => null,
-	'database.username' => 'temp',
-	'database.password' => '111111',
+	'database.username' => 'root',
+	'database.password' => '11111111',
 	'database.charset' => 'utf8mb4',
 	'database.database' => 'hefang-cms',
 	'password.salt' => "(*lfwekjfO*gklswjefwFDSefwgwlekjf",// 密码加密时使用的盐, 该值不能使用方法生成, 必须写死,
